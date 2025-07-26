@@ -1,0 +1,9 @@
+[project]
+name = "skelly-jelly"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "superclaude>=3.0.0.2",
+]
