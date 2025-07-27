@@ -116,11 +116,8 @@ impl From<tokio::sync::mpsc::error::RecvError> for StorageError {
     }
 }
 
-impl From<lz4::liblz4::Error> for StorageError {
-    fn from(err: lz4::liblz4::Error) -> Self {
-        Self::Compression(format!("LZ4 error: {}", err))
-    }
-}
+// Note: LZ4 error conversion removed due to private Error type
+// Compression errors should be handled directly when using LZ4
 
 #[cfg(test)]
 mod tests {
