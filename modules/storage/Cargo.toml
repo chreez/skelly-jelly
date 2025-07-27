@@ -1,0 +1,82 @@
+[package]
+name = "skelly-jelly-storage"
+version = "0.1.0"
+edition = "2021"
+authors = ["Skelly-Jelly Team"]
+description = "High-performance event storage and batching system"
+license = "MIT"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.35", features = ["full"] }
+tokio-stream = "0.1"
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite", "migrate", "chrono", "uuid"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+bincode = "1.3"
+prost = "0.12"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Logging and tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Data structures
+uuid = { version = "1.6", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+bytes = "1.5"
+
+# Performance
+lru = "0.12"
+dashmap = "5.5"
+parking_lot = "0.12"
+crossbeam-channel = "0.5"
+
+# Compression
+lz4 = "1.24"
+zstd = "0.13"
+
+# Metrics
+prometheus = "0.13"
+sysinfo = "0.30"
+
+# Configuration
+config = { version = "0.13", features = ["toml"] }
+dirs = "5.0"
+
+[dev-dependencies]
+# Testing
+criterion = "0.5"
+proptest = "1.4"
+tempfile = "3.8"
+mockall = "0.12"
+test-log = "0.2"
+
+# Async testing
+tokio-test = "0.4"
+futures = "0.3"
+
+[[bench]]
+name = "event_throughput"
+harness = false
+
+[[bench]]
+name = "batch_creation"
+harness = false
+
+[[bench]]
+name = "screenshot_processing"
+harness = false
+
+[features]
+default = ["compression", "metrics"]
+compression = ["lz4", "zstd"]
+metrics = ["prometheus", "sysinfo"]
+dev-mode = []

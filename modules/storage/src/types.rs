@@ -3,6 +3,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+use std::fmt;
 use std::time::{Duration, Instant};
 
 /// Unique identifier for screenshots
@@ -12,6 +13,22 @@ pub struct ScreenshotId(Uuid);
 impl ScreenshotId {
     pub fn new() -> Self {
         Self(Uuid::new_v4())
+    }
+    
+    pub fn as_bytes(&self) -> &[u8] {
+        self.0.as_bytes()
+    }
+}
+
+impl fmt::Display for ScreenshotId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl Default for ScreenshotId {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -54,7 +71,7 @@ pub struct KeystrokeEvent {
 }
 
 /// Keyboard modifiers
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct KeyModifiers {
     pub shift: bool,
     pub ctrl: bool,
@@ -214,53 +231,67 @@ pub struct InterventionRequest;
 #[derive(Debug, Clone)]
 pub struct AnimationCommand;
 
-/// Storage module configuration
-#[derive(Debug, Clone, Deserialize)]
-pub struct StorageConfig {
-    // Batching configuration
-    pub batch_window_seconds: u64,
-    pub max_events_per_batch: usize,
-    
-    // Screenshot management
-    pub screenshot_memory_threshold_mb: usize,
-    pub screenshot_retention_seconds: u64,
-    pub screenshot_memory_cache_size: usize,
-    pub dev_mode_screenshot_count: usize,
-    
-    // Database configuration
-    pub database_path: String,
-    pub database_pool_size: u32,
-    pub write_buffer_size_mb: usize,
-    pub compaction_interval_hours: u64,
-    
-    // Performance limits
-    pub max_memory_usage_mb: usize,
-    pub target_cpu_usage_percent: f32,
-    
-    // Retention policy
-    pub raw_events_retention_days: u32,
-    pub hourly_aggregates_retention_days: u32,
-    pub daily_summaries_retention_days: u32,
+impl Default for EventWindow {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
-impl Default for StorageConfig {
-    fn default() -> Self {
-        Self {
-            batch_window_seconds: 30,
-            max_events_per_batch: 10000,
-            screenshot_memory_threshold_mb: 5,
-            screenshot_retention_seconds: 30,
-            screenshot_memory_cache_size: 50,
-            dev_mode_screenshot_count: 5,
-            database_path: "~/.skelly-jelly/events.db".to_string(),
-            database_pool_size: 4,
-            write_buffer_size_mb: 10,
-            compaction_interval_hours: 24,
-            max_memory_usage_mb: 100,
-            target_cpu_usage_percent: 2.0,
-            raw_events_retention_days: 7,
-            hourly_aggregates_retention_days: 30,
-            daily_summaries_retention_days: 365,
+impl RawEvent {
+    /// Get the timestamp of the event
+    pub fn timestamp(&self) -> DateTime<Utc> {
+        match self {
+            Self::Keystroke(e) => e.timestamp,
+            Self::MouseMove(e) => e.timestamp,
+            Self::MouseClick(e) => e.timestamp,
+            Self::WindowFocus(e) => e.timestamp,
+            Self::Screenshot(e) => e.timestamp,
+            Self::ProcessStart(e) => e.timestamp,
+            Self::ResourceUsage(e) => e.timestamp,
         }
+    }
+    
+    /// Get the event type as a string
+    pub fn event_type(&self) -> &'static str {
+        match self {
+            Self::Keystroke(_) => "keystroke",
+            Self::MouseMove(_) => "mouse_move",
+            Self::MouseClick(_) => "mouse_click",
+            Self::WindowFocus(_) => "window_focus",
+            Self::Screenshot(_) => "screenshot",
+            Self::ProcessStart(_) => "process_start",
+            Self::ResourceUsage(_) => "resource_usage",
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_screenshot_id() {
+        let id1 = ScreenshotId::new();
+        let id2 = ScreenshotId::new();
+        assert_ne!(id1, id2);
+        assert_eq!(id1.as_bytes().len(), 16);
+    }
+    
+    #[test]
+    fn test_event_timestamp() {
+        let now = Utc::now();
+        let event = RawEvent::Keystroke(KeystrokeEvent {
+            timestamp: now,
+            key_code: 65,
+            modifiers: KeyModifiers {
+                shift: false,
+                ctrl: false,
+                alt: false,
+                meta: false,
+            },
+            inter_key_interval_ms: None,
+        });
+        assert_eq!(event.timestamp(), now);
+        assert_eq!(event.event_type(), "keystroke");
     }
 }
