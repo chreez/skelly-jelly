@@ -72,6 +72,7 @@ cover/
 .mypy_cache
 .pytest_cache
 .hypothesis
+test-results/
 
 # Local config
 config.json
