@@ -1,6 +1,6 @@
 //! Integration tests for the Storage module
 
-use skelly_jelly_storage::{init, StorageConfig};
+use skelly_jelly_storage::{StorageConfig, StorageModule};
 use tempfile::TempDir;
 
 #[tokio::test]
@@ -12,8 +12,9 @@ async fn test_storage_initialization() {
     config.database.path = temp_dir.path().join("test.db");
     config.database.pool_size = 1;
     
+    
     // Initialize storage module
-    let storage = skelly_jelly_storage::StorageModule::new(config)
+    let storage = StorageModule::new(config)
         .await
         .expect("Failed to initialize storage module");
     
@@ -29,11 +30,11 @@ async fn test_database_creation() {
     let mut config = StorageConfig::default();
     config.database.path = temp_dir.path().join("test.db");
     
-    let storage = skelly_jelly_storage::StorageModule::new(config)
+    let storage = StorageModule::new(config)
         .await
         .expect("Failed to initialize storage module");
     
-    // Check database size
+    // Check database size  
     let db_size = storage.database().get_size().await.unwrap();
     assert!(db_size > 0, "Database should have been created");
 }

@@ -167,7 +167,7 @@ impl StorageModule {
         let retention_days = self.config.retention.raw_events_days;
         
         tokio::spawn(async move {
-            let mut interval = tokio::time::interval(tokio::time::Duration::from_hours(24));
+            let mut interval = tokio::time::interval(tokio::time::Duration::from_secs(24 * 60 * 60));
             
             loop {
                 interval.tick().await;
