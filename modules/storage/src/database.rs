@@ -9,7 +9,7 @@ use sqlx::{
 use std::path::Path;
 use std::str::FromStr;
 use std::time::Duration;
-use tracing::{debug, info, warn};
+use tracing::info;
 use uuid::Uuid;
 
 /// Time-series optimized database for event storage
@@ -27,7 +27,18 @@ impl TimeSeriesDatabase {
         }
 
         // Build connection options
-        let options = SqliteConnectOptions::from_str(&format!("sqlite://{}", config.path.display()))?
+        // Convert path to absolute path and create proper connection string
+        let db_path = if config.path.is_absolute() {
+            config.path.clone()
+        } else {
+            std::env::current_dir()?.join(&config.path)
+        };
+        
+        // For SQLite, we can use the file path directly or with sqlite:// prefix
+        // Using the file path directly is more reliable for temporary directories
+        let options = SqliteConnectOptions::new()
+            .filename(&db_path)
+            .create_if_missing(true)
             .journal_mode(if config.wal_enabled {
                 SqliteJournalMode::Wal
             } else {
@@ -185,7 +196,7 @@ impl TimeSeriesDatabase {
             "#,
         )
         .bind(timestamp)
-        .bind(session_id.as_bytes())
+        .bind(&session_id.as_bytes()[..])
         .bind(event_type)
         .bind(&data)
         .execute(&self.pool)
@@ -219,7 +230,7 @@ impl TimeSeriesDatabase {
                 "#,
             )
             .bind(timestamp)
-            .bind(session_id.as_bytes())
+            .bind(&session_id.as_bytes()[..])
             .bind(event_type)
             .bind(&data)
             .execute(&mut *tx)
@@ -248,7 +259,7 @@ impl TimeSeriesDatabase {
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)
             "#,
         )
-        .bind(id.as_bytes())
+        .bind(&id.as_bytes()[..])
         .bind(timestamp)
         .bind(&metadata.window_title)
         .bind(&metadata.app_name)
@@ -279,7 +290,7 @@ impl TimeSeriesDatabase {
             ORDER BY timestamp
             "#,
         )
-        .bind(session_id.as_bytes())
+        .bind(&session_id.as_bytes()[..])
         .bind(start_ts)
         .bind(end_ts)
         .fetch_all(&self.pool)
@@ -409,15 +420,16 @@ mod tests {
         let (db, _temp_dir) = create_test_db().await;
         let session_id = Uuid::new_v4();
         
+        let now = Utc::now();
         let events = vec![
             RawEvent::Keystroke(KeystrokeEvent {
-                timestamp: Utc::now(),
+                timestamp: now,
                 key_code: 65,
                 modifiers: KeyModifiers::default(),
                 inter_key_interval_ms: Some(100),
             }),
             RawEvent::MouseClick(MouseClickEvent {
-                timestamp: Utc::now(),
+                timestamp: now + chrono::Duration::milliseconds(1),
                 x: 100,
                 y: 200,
                 button: MouseButton::Left,
