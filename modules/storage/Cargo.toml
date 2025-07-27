@@ -40,12 +40,12 @@ parking_lot = "0.12"
 crossbeam-channel = "0.5"
 
 # Compression
-lz4 = "1.24"
-zstd = "0.13"
+lz4 = { version = "1.24", optional = true }
+zstd = { version = "0.13", optional = true }
 
 # Metrics
-prometheus = "0.13"
-sysinfo = "0.30"
+prometheus = { version = "0.13", optional = true }
+sysinfo = { version = "0.30", optional = true }
 
 # Configuration
 config = { version = "0.13", features = ["toml"] }
@@ -63,17 +63,6 @@ test-log = "0.2"
 tokio-test = "0.4"
 futures = "0.3"
 
-[[bench]]
-name = "event_throughput"
-harness = false
-
-[[bench]]
-name = "batch_creation"
-harness = false
-
-[[bench]]
-name = "screenshot_processing"
-harness = false
 
 [features]
 default = ["compression", "metrics"]
