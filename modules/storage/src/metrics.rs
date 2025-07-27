@@ -8,7 +8,7 @@ use prometheus::{
 use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-use sysinfo::{CpuExt, System, SystemExt};
+use sysinfo::System;
 
 /// Performance metrics for monitoring storage operations
 #[derive(Clone)]
@@ -62,7 +62,14 @@ impl PerformanceMetrics {
             "Total number of events processed",
             &["event_type"]
         )
-        .unwrap();
+        .or_else(|_| -> Result<prometheus::CounterVec, prometheus::Error> {
+            // If registration fails (e.g., already registered), create an unregistered counter
+            Ok(prometheus::CounterVec::new(
+                prometheus::Opts::new("storage_events_unregistered", "Unregistered counter"),
+                &["event_type"]
+            )?)
+        })
+        .expect("Failed to create events counter");
 
         #[cfg(feature = "metrics")]
         let prom_screenshots_gauge = register_gauge_vec!(
@@ -70,7 +77,13 @@ impl PerformanceMetrics {
             "Current number of screenshots",
             &["location"]
         )
-        .unwrap();
+        .or_else(|_| -> Result<prometheus::GaugeVec, prometheus::Error> {
+            Ok(prometheus::GaugeVec::new(
+                prometheus::Opts::new("storage_screenshots_unregistered", "Unregistered screenshots gauge"),
+                &["location"]
+            )?)
+        })
+        .expect("Failed to create screenshots gauge");
 
         #[cfg(feature = "metrics")]
         let prom_resource_gauge = register_gauge_vec!(
@@ -78,7 +91,13 @@ impl PerformanceMetrics {
             "Resource usage metrics",
             &["resource"]
         )
-        .unwrap();
+        .or_else(|_| -> Result<prometheus::GaugeVec, prometheus::Error> {
+            Ok(prometheus::GaugeVec::new(
+                prometheus::Opts::new("storage_resources_unregistered", "Unregistered resource gauge"),
+                &["resource"]
+            )?)
+        })
+        .expect("Failed to create resource gauge");
 
         Self {
             // Event metrics
