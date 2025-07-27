@@ -27,6 +27,8 @@ pub use storage_module::StorageModule;
 // Re-export commonly used types
 pub use types::{
     BusMessage, EventBatch, RawEvent, ScreenshotEvent, ScreenshotId, ScreenshotMetadata,
+    KeystrokeEvent, MouseMoveEvent, MouseClickEvent, WindowFocusEvent, ProcessEvent, ResourceEvent,
+    ImageFormat, ScreenRegion, KeyModifiers, MouseButton, ClickType, ProcessEventType,
 };
 
 /// Module version
