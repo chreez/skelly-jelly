@@ -1,0 +1,101 @@
+[package]
+name = "skelly-jelly-data-capture"
+version = "0.1.0"
+edition = "2021"
+authors = ["Skelly-Jelly Team"]
+description = "System monitoring and event capture module for ADHD focus assistance"
+license = "MIT"
+
+[dependencies]
+# Core async runtime
+tokio = { version = "1.40", features = ["full"] }
+tokio-stream = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling and logging
+thiserror = "2.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1.0"
+async-trait = "0.1"
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# Data structures
+crossbeam-channel = "0.5"
+parking_lot = "0.12"
+dashmap = "6.0"
+uuid = { version = "1.11", features = ["v4", "serde"] }
+
+# Image processing for screenshots
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+imageproc = "0.25"
+
+# Pattern matching for privacy
+regex = "1.11"
+once_cell = "1.20"
+lazy_static = "1.5"
+
+# Configuration
+config = { version = "0.13", features = ["toml"] }
+toml = "0.8"
+
+# Shared types with other modules
+skelly-jelly-storage = { path = "../storage" }
+
+# URL parsing
+url = "2.5"
+
+# Random number generation
+rand = "0.8"
+
+# Platform-specific dependencies
+[target.'cfg(target_os = "macos")'.dependencies]
+core-foundation = "0.10"
+core-graphics = "0.24"
+cocoa = "0.26"
+objc = "0.2"
+libc = "0.2"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+windows = { version = "0.58", features = [
+    "Win32_Foundation",
+    "Win32_UI_WindowsAndMessaging", 
+    "Win32_System_Performance",
+    "Win32_System_ProcessStatus",
+    "Win32_Graphics_Gdi",
+    "Win32_UI_Input_KeyboardAndMouse"
+]}
+winapi = { version = "0.3", features = ["winuser", "processthreadsapi", "psapi"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+x11 = "2.21"
+xcb = "1.4"
+procfs = "0.17"
+
+[dev-dependencies]
+criterion = "0.5"
+mockall = "0.13"
+tempfile = "3.14"
+test-log = "0.2"
+tokio-test = "0.4"
+serial_test = "3.2"
+
+# Benchmarks - commented out until implemented
+# [[bench]]
+# name = "event_capture"
+# harness = false
+
+# [[bench]]
+# name = "privacy_masking"
+# harness = false
+
+[features]
+default = ["privacy", "screenshots"]
+privacy = []
+screenshots = []
+mock-platform = []  # For testing without real OS APIs
