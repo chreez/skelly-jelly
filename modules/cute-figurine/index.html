@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Skelly Companion - ADHD Focus Assistant</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        overflow: hidden;
+      }
+      
+      #root {
+        width: 100vw;
+        height: 100vh;
+        position: relative;
+      }
+      
+      .demo-container {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        max-width: 300px;
+        z-index: 10;
+      }
+      
+      .demo-title {
+        margin: 0 0 10px 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+      }
+      
+      .demo-description {
+        margin: 0;
+        font-size: 14px;
+        color: #666;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="demo-container">
+        <h1 class="demo-title">🦴 Skelly Companion Demo</h1>
+        <p class="demo-description">
+          Your ADHD focus companion is loading! Skelly will appear as a draggable, 
+          animated companion that responds to your focus states with gentle animations and support.
+        </p>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
