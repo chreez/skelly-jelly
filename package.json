@@ -1,0 +1,31 @@
+{
+  "name": "skelly-jelly",
+  "version": "1.0.0",
+  "description": "Your ADHD companion with a melty skeleton friend",
+  "private": true,
+  "workspaces": [
+    "modules/gamification",
+    "modules/cute-figurine"
+  ],
+  "scripts": {
+    "build": "npm run build:rust && npm run build:ts",
+    "build:rust": "cargo build --release",
+    "build:ts": "npm run build --workspaces",
+    "dev": "concurrently \"npm run dev:rust\" \"npm run dev:ts\"",
+    "dev:rust": "cargo run",
+    "dev:ts": "npm run dev --workspaces",
+    "test": "npm run test:rust && npm run test:ts",
+    "test:rust": "cargo test",
+    "test:ts": "npm run test --workspaces",
+    "start": "npm run build && ./target/release/skelly-jelly",
+    "demo": "./demo/run_demo.sh",
+    "clean": "cargo clean && npm run clean --workspaces"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}

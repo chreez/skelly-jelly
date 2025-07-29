@@ -1,0 +1,62 @@
+[package]
+name = "skelly-jelly"
+version = "1.0.0"
+edition = "2021"
+authors = ["Skelly Team"]
+description = "Your ADHD companion with a melty skeleton friend"
+license = "MIT"
+repository = "https://github.com/skelly-team/skelly-jelly"
+readme = "README.md"
+
+[workspace]
+members = [
+    "modules/event-bus",
+    "modules/orchestrator",
+    "modules/data-capture",
+    "modules/storage",
+    "modules/analysis-engine",
+    "modules/ai-integration",
+]
+exclude = [
+    "modules/gamification",
+    "modules/cute-figurine",
+]
+
+[dependencies]
+# Core dependencies
+anyhow = "1.0"
+tokio = { version = "1.35", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+clap = { version = "4.4", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+
+# Module dependencies
+skelly-jelly-event-bus = { path = "modules/event-bus" }
+skelly-jelly-orchestrator = { path = "modules/orchestrator" }
+skelly-jelly-data-capture = { path = "modules/data-capture" }
+skelly-jelly-storage = { path = "modules/storage" }
+skelly-jelly-analysis-engine = { path = "modules/analysis-engine" }
+skelly-jelly-ai-integration = { path = "modules/ai-integration" }
+
+
+[dev-dependencies]
+criterion = "0.5"
+proptest = "1.4"
+tempfile = "3.8"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true
+
+[profile.dev]
+opt-level = 0
+debug = true
+
+[[bin]]
+name = "skelly-jelly"
+path = "src/main.rs"

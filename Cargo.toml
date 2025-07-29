@@ -1,0 +1,46 @@
+[workspace]
+members = [
+    "modules/event-bus",
+    "modules/skelly-jelly-orchestrator", 
+    "modules/data-capture",
+    "modules/storage",
+    "modules/skelly-jelly-ai-integration"
+]
+resolver = "2"
+
+[package]
+name = "skelly-jelly"
+version = "1.0.0"
+edition = "2021"
+authors = ["Skelly Team"]
+description = "Your ADHD companion with a melty skeleton friend"
+license = "MIT"
+
+[dependencies]
+# Workspace modules
+skelly-jelly-event-bus = { path = "modules/event-bus" }
+skelly-jelly-orchestrator = { path = "modules/skelly-jelly-orchestrator" }
+skelly-jelly-data-capture = { path = "modules/data-capture" }
+skelly-jelly-storage = { path = "modules/storage" }
+skelly-jelly-analysis-engine = { path = "modules/analysis-engine" }
+skelly-jelly-ai-integration = { path = "modules/skelly-jelly-ai-integration" }
+
+# Core dependencies
+anyhow = "1.0"
+tokio = { version = "1.40", features = ["full"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+
+[[bin]]
+name = "skelly-jelly"
+path = "src/demo_with_simulated_figurine.rs"
+
+[[bin]]
+name = "skelly-jelly-integration"
+path = "src/main_integration_demo.rs"
+
+[[bin]]
+name = "skelly-jelly-full"
+path = "src/main.rs"
