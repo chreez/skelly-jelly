@@ -3,24 +3,82 @@
 ## Overview
 Skelly-Jelly is a neurodiversity-affirming ADHD focus assistant featuring a melty skeleton companion that provides ambient support without disrupting focus states. The system uses software-only monitoring to detect ADHD states and provide gentle, gamified interventions with context-aware work assistance.
 
-## Event Flow & Module Ownership
+## System Architecture & Module Overview
 
-### Event Creation & Ownership
+### Core Infrastructure Modules
+
+#### Event Bus Module
+- **Purpose:** High-performance message broker for all inter-module communication
+- **Capabilities:** 
+  - 1000+ messages/second throughput
+  - <1ms latency for high-priority messages
+  - Type-safe publish-subscribe messaging
+  - Configurable delivery guarantees
+- **Technology:** Rust with tokio async runtime, crossbeam channels
+
+#### Orchestrator Module
+- **Purpose:** System lifecycle manager and health monitor
+- **Responsibilities:**
+  - Module startup/shutdown sequencing
+  - Health monitoring with automatic recovery
+  - Configuration management with hot-reloading
+  - Resource allocation and throttling
+- **Technology:** Rust with dependency graph management
+
+### Event Flow & Module Ownership
 
 Each module has clear responsibilities for creating and processing specific event types:
 
 ```mermaid
-graph LR
-    subgraph "Event Flow"
-        DC[Data Capture] -->|RawEvent| ST[Storage]
-        ST -->|EventBatch| AE[Analysis Engine]
-        AE -->|StateClassification| GM[Gamification]
-        GM -->|InterventionRequest| AI[AI Integration]
-        AI -->|AnimationCommand| CF[Cute Figurine]
+graph TB
+    subgraph "Core Infrastructure"
+        EB[Event Bus]
+        OR[Orchestrator]
     end
+    
+    subgraph "Data Pipeline"
+        DC[Data Capture] -->|RawEvent| EB
+        EB -->|RawEvent| ST[Storage]
+        ST -->|EventBatch| EB
+        EB -->|EventBatch| AE[Analysis Engine]
+    end
+    
+    subgraph "User Experience"
+        AE -->|StateClassification| EB
+        EB -->|StateClassification| GM[Gamification]
+        GM -->|InterventionRequest| EB
+        EB -->|InterventionRequest| AI[AI Integration]
+        AI -->|AnimationCommand| EB
+        EB -->|AnimationCommand| CF[Cute Figurine]
+    end
+    
+    OR -.->|Health/Config| EB
+    EB -.->|Status| OR
 ```
 
 ### Module Responsibilities
+
+#### Event Bus Module (Core Infrastructure)
+- **Creates:** None (pure message broker)
+- **Receives:** All message types from all modules
+- **Emits to:** Subscribed modules based on filters
+- **Owns:** Message routing, delivery guarantees, metrics
+- **Key Features:**
+  - Ring buffers for high-frequency events
+  - Dead letter queue for failed deliveries
+  - Automatic retry with exponential backoff
+  - Performance metrics collection
+
+#### Orchestrator Module (Core Infrastructure)
+- **Creates:** HealthCheck, ConfigUpdate, Shutdown messages
+- **Receives:** HealthStatus, ModuleError messages
+- **Emits to:** All modules via Event Bus
+- **Owns:** Module lifecycle, health monitoring, recovery
+- **Key Features:**
+  - Dependency-ordered module startup
+  - Automatic failure recovery strategies
+  - Resource limit enforcement
+  - Configuration hot-reloading
 
 #### Data Capture Module
 - **Creates:** All `RawEvent` types
@@ -191,7 +249,40 @@ A non-intrusive reward system featuring a melty skeleton companion that provides
 
 ---
 
-### 2. Optimization Layer
+### 2. Event Bus & Orchestration Layer
+
+#### Overview
+Core infrastructure layer providing reliable inter-module communication and system lifecycle management. The Event Bus handles all message routing while the Orchestrator ensures system health and coordinated operation.
+
+#### Key Design Principles
+- **High-performance messaging**: Lock-free data structures, parallel processing
+- **Reliability first**: Message delivery guarantees, automatic retry
+- **Observable system**: Comprehensive metrics and monitoring
+- **Graceful degradation**: Automatic recovery and failover
+
+#### Core Components
+
+**Event Bus**
+- **Message Router**: High-performance routing with <1ms latency
+- **Subscription Manager**: Dynamic filter-based subscriptions
+- **Delivery Modes**: Best-effort, reliable, latest-only
+- **Performance**: 1000+ msg/sec with backpressure handling
+
+**Orchestrator**
+- **Module Registry**: Dependency graph and startup ordering
+- **Health Monitor**: Periodic checks with failure detection
+- **Recovery Manager**: Automated recovery strategies
+- **Resource Manager**: CPU/memory limit enforcement
+
+#### Integration Points
+- All modules register with Event Bus on startup
+- Orchestrator controls all module lifecycles
+- Health metrics flow through Event Bus
+- Configuration updates distributed via Event Bus
+
+---
+
+### 3. Optimization Layer
 
 #### Overview
 Performance-critical layer ensuring minimal system impact while maintaining high-fidelity behavioral data capture. Focuses on resource efficiency, battery optimization, and real-time processing capabilities.
@@ -613,6 +704,20 @@ Context-aware AI assistant providing genuinely helpful work-specific suggestions
 - **Event Loss**: <0.1%
 - **Startup Time**: ~2 seconds
 
+### Module Resource Allocation
+
+| Module | CPU Target | Memory Target | Technology |
+|--------|------------|---------------|-----------|
+| Event Bus | 2% | 100MB | Rust |
+| Orchestrator | 1% | 50MB | Rust |
+| Data Capture | 5% | 50MB | Rust |
+| Storage | 10% | 200MB | Rust |
+| Analysis Engine | 20% | 500MB | Rust |
+| Gamification | 5% | 100MB | TypeScript |
+| AI Integration | 30% | 4GB | Rust |
+| Cute Figurine | 10% | 200MB | TypeScript |
+| **Total System** | **<83%** | **<5.2GB** | - |
+
 ---
 
 ## Privacy & Security
@@ -631,10 +736,11 @@ Context-aware AI assistant providing genuinely helpful work-specific suggestions
 ## Development Architecture
 
 ### Build System
-- **Framework**: Nix + Bazel for hermetic, reproducible builds
-- **Package Manager**: Nix for dependency pinning, Bazel for incremental builds
-- **Single Entry Point**: `Justfile` for all commands
-- **Hot Reload**: Language-specific watchers orchestrated by Bazel
+- **Rust Modules**: Cargo workspace with shared dependencies
+- **TypeScript Modules**: npm workspaces for frontend modules
+- **Package Management**: Cargo for Rust, npm for TypeScript
+- **Build Commands**: `cargo build` for Rust, `npm run build` for TypeScript
+- **Development Mode**: `cargo run` + `npm run dev` with hot reload
 
 ### Project Structure
 ```
@@ -644,26 +750,46 @@ Context-aware AI assistant providing genuinely helpful work-specific suggestions
 ├── WORKSPACE                    # Bazel workspace configuration
 ├── shell.nix                    # Nix development environment
 ├── modules/
-│   ├── core/                    # Shared types and interfaces
+│   ├── event-bus/               # Rust module (Core Infrastructure)
 │   │   ├── src/
 │   │   ├── tests/
-│   │   └── BUILD.bazel
+│   │   └── Cargo.toml
+│   ├── orchestrator/            # Rust module (Core Infrastructure)
+│   │   ├── src/
+│   │   ├── tests/
+│   │   └── Cargo.toml
 │   ├── data-capture/            # Rust module
 │   │   ├── src/
 │   │   ├── tests/
-│   │   └── BUILD.bazel
-│   ├── analysis-engine/         # Rust module
+│   │   └── Cargo.toml
 │   ├── storage/                 # Rust module
+│   │   ├── src/
+│   │   ├── tests/
+│   │   └── Cargo.toml
+│   ├── analysis-engine/         # Rust module
+│   │   ├── src/
+│   │   ├── tests/
+│   │   └── Cargo.toml
+│   ├── ai-integration/          # Rust module
+│   │   ├── src/
+│   │   ├── tests/
+│   │   └── Cargo.toml
 │   ├── cute-figurine/           # TypeScript/WebGL
+│   │   ├── src/
+│   │   ├── tests/
+│   │   └── package.json
 │   ├── gamification/            # TypeScript
-│   └── ai-integration/          # Rust + TypeScript
+│   │   ├── src/
+│   │   ├── tests/
+│   │   └── package.json
 ├── tests/
 │   ├── integration/             # Cross-module tests
 │   │   └── contracts/           # Interface contracts (JSON schemas)
 │   └── fixtures/                # Shared test data
 ├── config/
 │   └── llm-keys.json           # Local API keys (gitignored)
-├── bazel-bin/                   # Bazel build outputs
+├── target/                      # Cargo build outputs
+├── node_modules/                # npm dependencies
 └── dist/                        # Distribution artifacts
 ```
 
@@ -745,12 +871,14 @@ just run        # Run in development mode
 ---
 
 1. **Technology Selection**:
-   - **UI Framework**: Tauri (Rust backend + WebView frontend)
-   - **Animation**: WebGL with Three.js or Pixi.js
+   - **UI Framework**: React + Vite (WebGL via Three.js/React Three Fiber)
+   - **Animation**: WebGL with @react-three/fiber and Framer Motion
    - **ML Runtime**: ONNX Runtime with CoreML acceleration
    - **LLM Inference**: llama.cpp with Metal support
-   - **Database**: SQLite with custom time-series extensions
-   - **Primary Language**: Rust (performance) + TypeScript (UI)
+   - **Database**: SQLite with SQLx for async operations
+   - **Primary Languages**: Rust (backend modules) + TypeScript (UI modules)
+   - **Message Broker**: Custom Event Bus with tokio async runtime
+   - **Serialization**: Protocol Buffers, serde, bincode
 
 2. **Prototype Priority**:
    - Phase 1: Cute Figurine + basic animations

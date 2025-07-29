@@ -1,8 +1,9 @@
-# >´ Skelly-Jelly
+# ðŸ¦´ Skelly-Jelly: Your ADHD Companion
 
 > A neurodiversity-affirming ADHD focus companion that actually helps
 
-[![Python 3.13+](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
+[![Rust](https://img.shields.io/badge/rust-1.75+-orange.svg)](https://www.rust-lang.org/)
+[![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## What is Skelly-Jelly?
@@ -11,12 +12,12 @@ Skelly-Jelly is your melty skeleton companion who helps you stay focused without
 
 ### ( Key Features
 
-- >à **Smart ADHD Detection** - Recognizes distraction, hyperfocus, and flow states
-- <® **Non-Intrusive Gamification** - Rewards without demanding attention  
-- =¡ **Context-Aware Help** - Useful tips for coding, writing, and design
-- >´ **Adorable Companion** - A melty skeleton that reflects your mental state
+- >ï¿½ **Smart ADHD Detection** - Recognizes distraction, hyperfocus, and flow states
+- <ï¿½ **Non-Intrusive Gamification** - Rewards without demanding attention  
+- =ï¿½ **Context-Aware Help** - Useful tips for coding, writing, and design
+- >ï¿½ **Adorable Companion** - A melty skeleton that reflects your mental state
 - = **Privacy First** - Everything runs locally on your device
-- ¡ **Lightweight** - <2% CPU usage, won't slow you down
+- ï¿½ **Lightweight** - <2% CPU usage, won't slow you down
 
 ## Quick Start
 
@@ -43,14 +44,14 @@ uv run python main.py
 
 ## Documentation
 
-- [=Ú Quick Start Guide](docs/QUICK_START.md) - Get up and running in 5 minutes
-- [<× Project Index](docs/PROJECT_INDEX.md) - Complete project overview
-- [=Ö High-Level Design](docs/skelly-jelly-hld.md) - Architecture and technical details
+- [=ï¿½ Quick Start Guide](docs/QUICK_START.md) - Get up and running in 5 minutes
+- [<ï¿½ Project Index](docs/PROJECT_INDEX.md) - Complete project overview
+- [=ï¿½ High-Level Design](docs/skelly-jelly-hld.md) - Architecture and technical details
 - [=' API Reference](docs/API_REFERENCE.md) - Module interfaces and APIs
 
 ## Project Status
 
-=§ **Early Development** - We're building the foundation. Join us!
+=ï¿½ **Early Development** - We're building the foundation. Join us!
 
 ### Current Focus
 - [ ] Core event system and data capture
@@ -72,9 +73,9 @@ We welcome contributions from developers, designers, and especially ADHD communi
 
 ## Community
 
-- =¬ [Discord Server](#) - Join our community (coming soon)
+- =ï¿½ [Discord Server](#) - Join our community (coming soon)
 - = [Issue Tracker](https://github.com/yourusername/skelly-jelly/issues) - Report bugs or request features
-- =ç [Mailing List](#) - Development updates (coming soon)
+- =ï¿½ [Mailing List](#) - Development updates (coming soon)
 
 ## License
 
@@ -88,4 +89,4 @@ Built with love for the ADHD community. Special thanks to everyone who shared th
 
 *"A better Clippy" - but one that actually helps, respects your focus, and makes work a little less overwhelming for ADHD brains.*
 
->´( Made with melty skeleton magic
+>ï¿½( Made with melty skeleton magic
