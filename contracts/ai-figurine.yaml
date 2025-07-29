@@ -1,0 +1,101 @@
+# Contract: AI Integration → Cute Figurine
+# Defines the AnimationCommand message format
+
+contract:
+  producer: skelly-jelly-ai-integration
+  consumer: skelly-jelly-cute-figurine
+  message: AnimationCommand
+  version: "1.0.0"
+  
+schema:
+  type: object
+  required: [id, animation, timestamp]
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: "Unique animation command identifier"
+      
+    animation:
+      type: string
+      enum: [
+        "idle_bounce",
+        "gentle_wave",
+        "happy_dance",
+        "thinking",
+        "sleepy",
+        "melting",
+        "stretching",
+        "celebrating",
+        "concerned",
+        "encouraging"
+      ]
+      description: "Animation to play"
+      
+    timestamp:
+      type: string
+      format: date-time
+      description: "When the command was issued"
+      
+    duration:
+      type: integer
+      minimum: 1000
+      maximum: 30000
+      default: 5000
+      description: "Animation duration in milliseconds"
+      
+    message:
+      type: object
+      nullable: true
+      description: "Optional text bubble message"
+      properties:
+        text:
+          type: string
+          maxLength: 200
+          description: "Message to display"
+          
+        duration:
+          type: integer
+          minimum: 2000
+          maximum: 15000
+          default: 5000
+          description: "Message display duration in milliseconds"
+          
+        style:
+          type: string
+          enum: [normal, encouraging, gentle, celebratory]
+          default: normal
+          
+    expression:
+      type: string
+      enum: [neutral, happy, concerned, sleepy, focused, excited]
+      default: neutral
+      description: "Facial expression during animation"
+      
+    position_hint:
+      type: object
+      nullable: true
+      description: "Suggested position adjustment"
+      properties:
+        edge:
+          type: string
+          enum: [top, bottom, left, right]
+          
+        offset:
+          type: object
+          properties:
+            x:
+              type: integer
+              minimum: -100
+              maximum: 100
+              
+            y:
+              type: integer
+              minimum: -100
+              maximum: 100
+
+validation:
+  - animation_availability: "Requested animation must be implemented"
+  - message_length: "Message text should be concise for readability"
+  - duration_sanity: "Total duration (animation + message) should not exceed 30 seconds"
+  - expression_match: "Expression should match animation mood"

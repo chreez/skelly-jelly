@@ -1,0 +1,71 @@
+# Contract: Analysis Engine → Gamification
+# Defines the StateClassification message format
+
+contract:
+  producer: skelly-jelly-analysis-engine
+  consumer: skelly-jelly-gamification
+  message: StateClassification
+  version: "1.0.0"
+  
+schema:
+  type: object
+  required: [state, confidence, timestamp]
+  properties:
+    state:
+      type: string
+      enum: [focused, distracted, hyperfocused, transitioning, idle]
+      description: "Detected ADHD state"
+      
+    confidence:
+      type: number
+      minimum: 0.0
+      maximum: 1.0
+      description: "Confidence score for the classification"
+      
+    timestamp:
+      type: string
+      format: date-time
+      description: "When the state was detected"
+      
+    transition_from:
+      type: string
+      enum: [focused, distracted, hyperfocused, transitioning, idle]
+      description: "Previous state if this is a transition"
+      nullable: true
+      
+    contributing_factors:
+      type: array
+      description: "Factors that led to this classification"
+      items:
+        type: string
+        enum: [
+          "high_window_switching",
+          "irregular_typing_pattern", 
+          "excessive_mouse_movement",
+          "long_idle_period",
+          "consistent_typing_rhythm",
+          "minimal_context_switching"
+        ]
+        
+    metrics:
+      type: object
+      description: "Supporting metrics for the classification"
+      properties:
+        keystroke_variance:
+          type: number
+          minimum: 0
+          
+        window_switch_rate:
+          type: number
+          minimum: 0
+          description: "Switches per minute"
+          
+        focus_duration:
+          type: number
+          minimum: 0
+          description: "Seconds in current state"
+
+validation:
+  - confidence_threshold: "Confidence must be >= 0.7 for state transitions"
+  - transition_logic: "transition_from must differ from current state"
+  - timestamp_ordering: "Timestamps must be monotonically increasing"

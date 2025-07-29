@@ -1,0 +1,88 @@
+# Contract: Gamification → AI Integration
+# Defines the InterventionRequest message format
+
+contract:
+  producer: skelly-jelly-gamification
+  consumer: skelly-jelly-ai-integration
+  message: InterventionRequest
+  version: "1.0.0"
+  
+schema:
+  type: object
+  required: [id, trigger_state, intervention_type, context, timestamp]
+  properties:
+    id:
+      type: string
+      format: uuid
+      description: "Unique intervention request identifier"
+      
+    trigger_state:
+      type: string
+      enum: [focused, distracted, hyperfocused, transitioning, idle]
+      description: "The state that triggered this intervention"
+      
+    intervention_type:
+      type: string
+      enum: [gentle_nudge, encouragement, break_suggestion, focus_tip, celebration]
+      description: "Type of intervention needed"
+      
+    timestamp:
+      type: string
+      format: date-time
+      description: "When the intervention was requested"
+      
+    context:
+      type: object
+      required: [work_type, duration_in_state, recent_progress]
+      properties:
+        work_type:
+          type: string
+          enum: [coding, writing, designing, researching, unknown]
+          description: "Type of work user is doing"
+          
+        duration_in_state:
+          type: integer
+          minimum: 0
+          description: "Seconds user has been in current state"
+          
+        recent_progress:
+          type: object
+          properties:
+            tasks_completed:
+              type: integer
+              minimum: 0
+              
+            focus_sessions:
+              type: integer
+              minimum: 0
+              
+            total_focus_time:
+              type: integer
+              minimum: 0
+              description: "Total focus time in seconds today"
+              
+        last_intervention:
+          type: object
+          nullable: true
+          properties:
+            timestamp:
+              type: string
+              format: date-time
+              
+            type:
+              type: string
+              
+            was_helpful:
+              type: boolean
+              nullable: true
+
+    priority:
+      type: string
+      enum: [low, medium, high]
+      default: medium
+      description: "Urgency of the intervention"
+
+validation:
+  - cooldown_period: "Minimum 15 minutes between interventions (unless high priority)"
+  - context_relevance: "intervention_type must be appropriate for trigger_state"
+  - work_awareness: "work_type detection confidence must be > 0.6"

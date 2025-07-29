@@ -1,0 +1,61 @@
+# Contract: Storage → Analysis Engine
+# Defines the EventBatch message format passed from Storage to Analysis Engine
+
+contract:
+  producer: skelly-jelly-storage
+  consumer: skelly-jelly-analysis-engine
+  message: EventBatch
+  version: "1.0.0"
+  
+schema:
+  type: object
+  required: [window_start, window_end, events, session_id]
+  properties:
+    window_start:
+      type: string
+      format: date-time
+      description: "Start of the 30-second analysis window"
+      
+    window_end:
+      type: string
+      format: date-time
+      description: "End of the 30-second analysis window"
+      
+    session_id:
+      type: string
+      format: uuid
+      description: "Unique session identifier"
+      
+    events:
+      type: array
+      description: "Collection of raw events in this window"
+      minItems: 0
+      maxItems: 10000
+      items:
+        $ref: "#/definitions/RawEvent"
+
+definitions:
+  RawEvent:
+    type: object
+    required: [id, timestamp, event_type]
+    properties:
+      id:
+        type: string
+        format: uuid
+        
+      timestamp:
+        type: string
+        format: date-time
+        
+      event_type:
+        type: string
+        enum: [keystroke, mouse_move, mouse_click, window_focus, screenshot, process, resource]
+        
+      data:
+        type: object
+        description: "Event-specific data payload"
+
+validation:
+  - window_duration: "window_end - window_start must equal 30 seconds"
+  - event_timestamps: "All event timestamps must be within window bounds"
+  - session_consistency: "All events must have same session_id as batch"

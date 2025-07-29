@@ -1,0 +1,28 @@
+[package]
+name = "skelly-jelly-integration-tests"
+version = "0.1.0"
+edition = "2021"
+
+[[test]]
+name = "event_flow"
+path = "event_flow_test.rs"
+
+[dependencies]
+# Workspace modules
+skelly-jelly-event-bus = { path = "../../modules/event-bus" }
+skelly-jelly-orchestrator = { path = "../../modules/skelly-jelly-orchestrator" }
+skelly-jelly-data-capture = { path = "../../modules/data-capture" }
+skelly-jelly-storage = { path = "../../modules/storage" }
+skelly-jelly-analysis-engine = { path = "../../modules/analysis-engine" }
+
+# Async runtime
+tokio = { version = "1.40", features = ["full", "test-util"] }
+
+# Testing utilities
+uuid = { version = "1.11", features = ["v4"] }
+chrono = "0.4"
+
+[dev-dependencies]
+# Additional test dependencies
+mockall = "0.13"
+serial_test = "3.2"

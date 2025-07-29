@@ -1,0 +1,24 @@
+[package]
+name = "skelly-jelly-benchmarks"
+version = "0.1.0"
+edition = "2021"
+
+[[bench]]
+name = "performance_baselines"
+harness = false
+
+[dependencies]
+# Workspace modules (when implemented)
+# skelly-jelly-event-bus = { path = "../modules/event-bus" }
+# skelly-jelly-data-capture = { path = "../modules/data-capture" }
+# skelly-jelly-storage = { path = "../modules/storage" }
+
+# Benchmarking
+criterion = { version = "0.5", features = ["html_reports"] }
+
+# Utilities
+tokio = { version = "1.40", features = ["full"] }
+sysinfo = "0.30"
+
+[profile.bench]
+debug = true

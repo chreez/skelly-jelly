@@ -1,0 +1,161 @@
+# Skelly-Jelly Default Configuration
+# Your ADHD companion with a melty skeleton friend
+
+# Event Bus Configuration
+[event_bus]
+max_queue_size = 10000
+message_timeout_ms = 5000
+enable_persistence = false
+persistence_path = "./data/event_bus"
+
+# Orchestrator Configuration
+[orchestrator]
+health_check_interval_ms = 30000
+startup_timeout_ms = 60000
+shutdown_timeout_ms = 30000
+enable_recovery = true
+max_recovery_attempts = 3
+
+# Storage Module
+[storage]
+database_path = "./data/skelly.db"
+max_batch_size = 1000
+batch_timeout_ms = 30000
+retention_days = 30
+enable_compression = true
+
+# Data Capture Module
+[data_capture]
+screenshot_interval_ms = 60000
+enable_screenshots = true
+screenshot_quality = 50
+keystroke_buffer_size = 100
+mouse_sample_rate_hz = 10
+window_tracking_enabled = true
+
+# Analysis Engine Module
+[analysis_engine]
+model_path = "./models/adhd_classifier.onnx"
+inference_threads = 4
+window_size_seconds = 30
+window_overlap_seconds = 5
+confidence_threshold = 0.7
+enable_gpu = false
+
+# Gamification Module
+[gamification]
+[gamification.intervention]
+min_cooldown_minutes = 15
+adaptive_cooldown = true
+max_interventions_per_hour = 3
+respect_flow_states = true
+flow_state_threshold = 0.8
+emergency_override = false
+
+[gamification.rewards]
+coins_per_focus_minute = 1
+bonus_multiplier = 1.5
+variable_ratio_base = 0.15
+streak_bonus_multiplier = 1.2
+
+[gamification.rewards.achievement_coins]
+common = 25
+rare = 100
+epic = 250
+legendary = 500
+
+[gamification.rewards.milestone_rewards]
+first_hour = 50
+daily_goal = 100
+weekly_streak = 200
+
+[gamification.progress]
+session_timeout_minutes = 30
+streak_requirement_days = 3
+milestone_thresholds = [1, 5, 10, 25, 50, 100]
+metric_update_interval = 30
+history_retention_days = 90
+
+[gamification.companion]
+animation_duration = 3000
+expression_variety = true
+idle_variations = true
+reaction_sensitivity = 0.7
+
+[gamification.companion.personality_traits]
+cheerfulness = 0.7
+humor = 0.5
+formality = 0.2
+supportiveness = 0.8
+
+[gamification.messages]
+max_length = 150
+personalized_generation = true
+template_variety = true
+adaptive_tone = true
+context_awareness = true
+
+[gamification.performance]
+max_history_entries = 1000
+batch_update_size = 10
+cache_timeout = 300
+animation_queue_size = 20
+
+# AI Integration Module
+[ai_integration]
+[ai_integration.local_model]
+model_path = "./models/tinyllama-1.1b-chat.gguf"
+model_variant = "TinyLlama"
+auto_download = false
+max_memory_gb = 4.0
+use_gpu = true
+gpu_layers = 32
+context_length = 2048
+batch_size = 512
+threads = 8
+use_mmap = true
+use_mlock = false
+temperature = 0.7
+top_p = 0.9
+repeat_penalty = 1.1
+
+[ai_integration.api_config]
+enable_api_fallback = true
+openai_key = ""  # Set via environment variable OPENAI_API_KEY
+anthropic_key = ""  # Set via environment variable ANTHROPIC_API_KEY
+openai_model = "gpt-3.5-turbo"
+anthropic_model = "claude-3-haiku-20240307"
+max_monthly_cost = 10.0
+request_timeout_ms = 30000
+
+[ai_integration.privacy]
+default_privacy_level = "LocalOnly"
+enable_pii_detection = true
+sanitization_level = "aggressive"
+allow_api_fallback = false
+require_explicit_consent = true
+
+[ai_integration.personality]
+base_traits = "supportive"
+humor_level = "moderate"
+formality = "casual"
+pun_frequency = 0.1
+
+# Cute Figurine Module
+[cute_figurine]
+window_width = 200
+window_height = 200
+position_x = -1  # -1 for auto-position
+position_y = -1
+enable_transparency = true
+always_on_top = true
+enable_click_through = true
+animation_fps = 30
+enable_webgl = true
+
+# Demo Mode Settings
+[demo]
+enable_synthetic_data = true
+synthetic_event_rate_hz = 10
+demo_state_transitions = ["neutral", "focused", "flow", "distracted", "neutral"]
+demo_duration_minutes = 5
