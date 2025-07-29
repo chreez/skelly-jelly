@@ -8,7 +8,7 @@ use crate::{ModuleId, SubscriptionId};
 pub type EventBusResult<T> = Result<T, EventBusError>;
 
 /// Comprehensive error types for event bus operations
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Clone)]
 pub enum EventBusError {
     #[error("Subscriber {subscriber} is temporarily unavailable, retry after {retry_after:?}")]
     SubscriberUnavailable {
@@ -46,11 +46,20 @@ pub enum EventBusError {
     #[error("Configuration error: {0}")]
     Configuration(String),
 
+    #[error("Module {module_id} is already registered")]
+    ModuleAlreadyRegistered { module_id: ModuleId },
+
+    #[error("Module {module_id} not found")]
+    ModuleNotFound { module_id: ModuleId },
+
+    #[error("Invalid health check response")]
+    InvalidHealthCheckResponse,
+
     #[error("Internal error: {0}")]
     Internal(String),
 
     #[error("IO error: {0}")]
-    Io(#[from] std::io::Error),
+    Io(String),
 }
 
 impl EventBusError {

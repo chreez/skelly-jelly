@@ -12,12 +12,16 @@ use crate::{
     subscription::{DeliveryMode, MessageFilter, Subscription},
     router::{MessageRouter, RouterConfig},
     metrics::BusMetrics,
+    registry::{ModuleRegistry, ModuleInfo, RegistryConfig},
 };
 
 /// Main event bus implementation
 pub struct EventBusImpl {
     /// Message router for handling delivery
     router: Arc<MessageRouter>,
+    
+    /// Module registry for tracking registered modules
+    registry: Arc<ModuleRegistry>,
     
     /// Configuration
     config: EventBusConfig,
@@ -40,9 +44,13 @@ impl EventBusImpl {
         };
 
         let router = Arc::new(MessageRouter::new(router_config));
+        
+        let registry_config = RegistryConfig::default();
+        let registry = Arc::new(ModuleRegistry::new(registry_config));
 
         Ok(Self {
             router,
+            registry,
             config,
             module_receivers: Arc::new(parking_lot::RwLock::new(HashMap::new())),
             is_shutdown: Arc::new(parking_lot::RwLock::new(false)),
@@ -72,6 +80,29 @@ impl EventBusImpl {
         self.module_receivers.write().insert(module, receiver.clone());
         
         receiver
+    }
+
+    /// Register a module with the event bus
+    pub fn register_module(&self, module_info: ModuleInfo) -> EventBusResult<()> {
+        self.registry.register_module(module_info)
+    }
+
+    /// Unregister a module
+    pub fn unregister_module(&self, module_id: ModuleId) -> EventBusResult<ModuleInfo> {
+        self.registry.unregister_module(module_id)
+    }
+
+    /// Get module registry
+    pub fn registry(&self) -> &Arc<ModuleRegistry> {
+        &self.registry
+    }
+
+    /// Get a receiver for a subscription (mock implementation for tests)
+    pub async fn get_receiver(&self, _subscription_id: SubscriptionId) -> EventBusResult<Receiver<BusMessage>> {
+        // This is a placeholder implementation for testing
+        // In a real implementation, you'd want to return the actual receiver for the subscription
+        let (_, receiver) = bounded(1000);
+        Ok(receiver)
     }
 }
 

@@ -9,6 +9,13 @@ pub mod router;
 pub mod subscription;
 pub mod bus;
 pub mod metrics;
+pub mod registry;
+pub mod circuit_breaker;
+pub mod retry;
+pub mod dead_letter_queue;
+pub mod error_logging;
+pub mod recovery;
+pub mod enhanced_bus;
 
 // Re-export public API
 pub use bus::{EventBus, EventBusImpl, create_event_bus, create_event_bus_with_config};
@@ -16,6 +23,15 @@ pub use error::{EventBusError, EventBusResult};
 pub use message::{BusMessage, MessagePayload, MessagePriority, ModuleId, MessageType};
 pub use subscription::{MessageFilter, SubscriptionId, DeliveryMode};
 pub use metrics::BusMetrics;
+pub use registry::{ModuleRegistry, ModuleInfo, ModuleStatus, HealthSummary, SystemHealth, RegistryConfig};
+
+// Re-export error handling components
+pub use circuit_breaker::{CircuitBreaker, CircuitBreakerConfig, CircuitBreakerRegistry, CircuitBreakerStats, CircuitState};
+pub use retry::{RetryExecutor, RetryConfig, RetryStats, RetryPolicy, create_retry_executor};
+pub use dead_letter_queue::{DeadLetterQueue, DeadLetterEntry, DeadLetterReason, DeadLetterStats, create_dead_letter_queue};
+pub use error_logging::{ErrorLogger, ErrorContext, ErrorSeverity, ErrorCategory, CorrelationId, create_error_logger};
+pub use recovery::{RecoverySystem, RecoveryAction, RecoveryStrategy, EscalationLevel, RecoveryIncident, IncidentStatus};
+pub use enhanced_bus::{EnhancedEventBus, EnhancedEventBusArc, ErrorHandlingStats, create_enhanced_event_bus, create_enhanced_event_bus_with_config};
 
 use async_trait::async_trait;
 use uuid::Uuid;
@@ -70,6 +86,21 @@ pub struct EventBusConfig {
     
     /// Threshold for detecting slow message handlers
     pub slow_handler_threshold: std::time::Duration,
+    
+    /// Configuration for circuit breakers
+    pub circuit_breaker_config: Option<CircuitBreakerConfig>,
+    
+    /// Configuration for retry logic
+    pub retry_config: Option<RetryConfig>,
+    
+    /// Configuration for error logging
+    pub error_logging_config: Option<error_logging::ErrorLoggerConfig>,
+    
+    /// Configuration for recovery system
+    pub recovery_config: Option<recovery::RecoveryConfig>,
+    
+    /// Whether to enable comprehensive error handling
+    pub enable_error_handling: bool,
 }
 
 impl Default for EventBusConfig {
@@ -81,6 +112,11 @@ impl Default for EventBusConfig {
             dead_letter_queue_size: 1_000,
             metrics_interval: std::time::Duration::from_secs(10),
             slow_handler_threshold: std::time::Duration::from_millis(100),
+            circuit_breaker_config: Some(CircuitBreakerConfig::default()),
+            retry_config: Some(RetryConfig::default()),
+            error_logging_config: Some(error_logging::ErrorLoggerConfig::default()),
+            recovery_config: Some(recovery::RecoveryConfig::default()),
+            enable_error_handling: true,
         }
     }
 }

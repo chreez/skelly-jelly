@@ -2,7 +2,7 @@
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::time::SystemTime;
+use std::time::{Duration, SystemTime};
 use uuid::Uuid;
 
 /// Unique identifier for a module in the system
@@ -197,12 +197,54 @@ pub struct RawEvent {
     pub timestamp: DateTime<Utc>,
 }
 
+impl RawEvent {
+    /// Create a keystroke event
+    pub fn keystroke(key: String, duration: Duration, modifiers: Vec<String>) -> Self {
+        Self {
+            event_type: "keystroke".to_string(),
+            data: serde_json::json!({
+                "key": key,
+                "duration_ms": duration.as_millis(),
+                "modifiers": modifiers
+            }),
+            window_title: None,
+            timestamp: Utc::now(),
+        }
+    }
+
+    /// Create a mouse move event
+    pub fn mouse_move(x: f64, y: f64) -> Self {
+        Self {
+            event_type: "mouse_move".to_string(),
+            data: serde_json::json!({
+                "x": x,
+                "y": y
+            }),
+            window_title: None,
+            timestamp: Utc::now(),
+        }
+    }
+
+    /// Create a screenshot event
+    pub fn screenshot(data: Vec<u8>) -> Self {
+        Self {
+            event_type: "screenshot".to_string(),
+            data: serde_json::json!({
+                "size_bytes": data.len(),
+                "format": "png"
+            }),
+            window_title: None,
+            timestamp: Utc::now(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EventBatch {
+    pub window_start: DateTime<Utc>,
+    pub window_end: DateTime<Utc>,
     pub events: Vec<RawEvent>,
-    pub batch_id: Uuid,
-    pub start_time: DateTime<Utc>,
-    pub end_time: DateTime<Utc>,
+    pub session_id: Uuid,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -262,8 +304,17 @@ pub struct AnimationCommand {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct HealthCheckRequest {
-    pub request_id: Uuid,
-    pub target_module: Option<ModuleId>,
+    pub module_id: ModuleId,
+    pub timestamp: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct HealthCheckResponse {
+    pub module_id: ModuleId,
+    pub status: String,
+    pub timestamp: DateTime<Utc>,
+    pub response_time_ms: u64,
+    pub details: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -275,8 +326,9 @@ pub struct ConfigUpdate {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ShutdownRequest {
-    pub graceful: bool,
-    pub timeout_secs: u32,
+    pub module_id: ModuleId,
+    pub timeout: Duration,
+    pub save_state: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
