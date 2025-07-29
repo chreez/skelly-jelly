@@ -32,6 +32,18 @@ impl Default for ScreenshotId {
     }
 }
 
+impl From<String> for ScreenshotId {
+    fn from(s: String) -> Self {
+        Self(Uuid::parse_str(&s).unwrap_or_else(|_| Uuid::new_v4()))
+    }
+}
+
+impl From<&str> for ScreenshotId {
+    fn from(s: &str) -> Self {
+        Self(Uuid::parse_str(s).unwrap_or_else(|_| Uuid::new_v4()))
+    }
+}
+
 /// Image formats supported by the system
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum ImageFormat {
@@ -129,11 +141,7 @@ pub struct ScreenshotEvent {
     pub screenshot_id: ScreenshotId,
     #[serde(skip_serializing, skip_deserializing)]
     pub data: Vec<u8>, // Raw image data (not serialized)
-    pub format: ImageFormat,
-    pub window_title: String,
-    pub app_name: String,
-    pub region: ScreenRegion,
-    pub privacy_masked: bool,
+    pub metadata: ScreenshotMetadata,
 }
 
 /// Process lifecycle event
@@ -183,6 +191,26 @@ pub struct ScreenshotMetadata {
     pub dominant_colors: Vec<String>, // Hex colors
     pub ui_element_count: u32,
     pub privacy_masked: bool,
+}
+
+impl Default for ScreenshotMetadata {
+    fn default() -> Self {
+        Self {
+            timestamp: Utc::now(),
+            window_title: String::new(),
+            app_name: String::new(),
+            screen_region: ScreenRegion {
+                x: 0,
+                y: 0,
+                width: 1920,
+                height: 1080,
+            },
+            text_density: 0.0,
+            dominant_colors: Vec::new(),
+            ui_element_count: 0,
+            privacy_masked: false,
+        }
+    }
 }
 
 /// Event window for batching

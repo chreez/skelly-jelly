@@ -63,6 +63,18 @@ pub enum StorageError {
     #[error("Operation timed out: {0}")]
     Timeout(String),
 
+    /// Privacy violation error
+    #[error("Privacy violation: {0}")]
+    PrivacyViolation(String),
+
+    /// Not found error
+    #[error("Not found: {0}")]
+    NotFound(String),
+
+    /// IO error (alternative for consistency)
+    #[error("IO error: {0}")]
+    IoError(String),
+
     /// Other errors
     #[error("{0}")]
     Other(String),

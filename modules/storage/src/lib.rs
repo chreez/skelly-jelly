@@ -8,17 +8,21 @@
 #![warn(clippy::pedantic)]
 #![allow(clippy::module_name_repetitions)]
 
+pub mod audit_logger;
 pub mod config;
 pub mod database;
+pub mod encryption;
 pub mod error;
 pub mod metrics;
 pub mod types;
 
 mod batch_manager;
 mod event_receiver;
+pub mod privacy_api;
 mod screenshot_manager;
 mod storage_module;
 
+pub use audit_logger::{PrivacyAuditLogger, AuditConfig, AuditCategory, AuditOutcome, PrivacyLevel, DataSensitivity};
 pub use config::StorageConfig;
 pub use error::{Result, StorageError};
 pub use metrics::PerformanceMetrics;
