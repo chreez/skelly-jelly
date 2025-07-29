@@ -11,6 +11,9 @@ use crate::{config::{PrivacyConfig, PrivacyZone, PrivacyMode}, error::{DataCaptu
 
 pub mod masking;
 pub mod filters;
+pub mod ml_pii_detector;
+
+pub use ml_pii_detector::{AdvancedPIIDetector, PIIDetection, PIIType, DetectionContext, UserActivity, PIIAccuracyStats};
 
 /// PII detection patterns
 static EMAIL_REGEX: Lazy<Regex> = Lazy::new(|| {
@@ -32,11 +35,16 @@ static PHONE_REGEX: Lazy<Regex> = Lazy::new(|| {
 /// Main privacy filter for processing captured data
 pub struct PrivacyFilter {
     config: PrivacyConfig,
+    /// Advanced ML-enhanced PII detector
+    pii_detector: AdvancedPIIDetector,
 }
 
 impl PrivacyFilter {
     pub fn new(config: PrivacyConfig) -> Self {
-        Self { config }
+        Self { 
+            config,
+            pii_detector: AdvancedPIIDetector::new(),
+        }
     }
     
     /// Update the privacy configuration
@@ -75,40 +83,56 @@ impl PrivacyFilter {
         self.config.sensitive_app_list.iter().any(|sensitive| app_name.contains(sensitive))
     }
     
-    /// Filter text content for PII
-    pub fn filter_text(&self, text: &str) -> String {
+    /// Filter text content for PII using ML-enhanced detection
+    pub fn filter_text(&mut self, text: &str, app_name: &str, window_title: &str) -> String {
         if !self.config.pii_detection {
             return text.to_string();
         }
         
-        let mut filtered = text.to_string();
+        // Create detection context
+        let context = DetectionContext {
+            app_name: app_name.to_string(),
+            window_title: window_title.to_string(),
+            user_activity: UserActivity::Typing,
+            time_context: chrono::Utc::now(),
+        };
         
-        // Mask emails
-        if self.config.mask_emails {
-            filtered = EMAIL_REGEX.replace_all(&filtered, "[EMAIL]").to_string();
-        }
+        // Use ML-enhanced PII detection
+        let detections = self.pii_detector.detect_pii(text, &context);
         
-        // Mask SSNs
-        if self.config.mask_ssn {
-            filtered = SSN_REGEX.replace_all(&filtered, "[SSN]").to_string();
-        }
+        // Filter based on config settings
+        let filtered_detections: Vec<PIIDetection> = detections.into_iter()
+            .filter(|detection| self.should_mask_pii_type(detection.pii_type))
+            .collect();
         
-        // Mask credit cards
-        if self.config.mask_credit_cards {
-            filtered = CREDIT_CARD_REGEX.replace_all(&filtered, "[CREDIT_CARD]").to_string();
-        }
+        // Apply masking
+        let filtered = self.pii_detector.mask_pii(text, &filtered_detections);
         
-        // Mask phone numbers
-        filtered = PHONE_REGEX.replace_all(&filtered, "[PHONE]").to_string();
-        
-        // Additional password field detection
+        // Additional password field detection for legacy support
         if self.config.mask_passwords {
-            // Look for password-like patterns (sequences of asterisks or dots)
             let password_pattern = Regex::new(r"\*{3,}|•{3,}|\.{3,}").unwrap();
-            filtered = password_pattern.replace_all(&filtered, "[PASSWORD]").to_string();
+            password_pattern.replace_all(&filtered, "[PASSWORD]").to_string()
+        } else {
+            filtered
         }
-        
-        filtered
+    }
+    
+    /// Check if a PII type should be masked based on config
+    fn should_mask_pii_type(&self, pii_type: PIIType) -> bool {
+        match pii_type {
+            PIIType::Email => self.config.mask_emails,
+            PIIType::SSN => self.config.mask_ssn,
+            PIIType::CreditCard => self.config.mask_credit_cards,
+            PIIType::Phone => true, // Always mask phone numbers
+            PIIType::Password => self.config.mask_passwords,
+            PIIType::ApiKey | PIIType::BankAccount => true, // Always mask sensitive data
+            _ => true, // Default to masking for safety
+        }
+    }
+    
+    /// Get PII detection accuracy statistics
+    pub fn get_pii_accuracy_stats(&self) -> PIIAccuracyStats {
+        self.pii_detector.get_accuracy_stats()
     }
     
     /// Apply privacy masking to a screenshot
@@ -264,27 +288,27 @@ mod tests {
     fn test_email_detection() {
         let mut config = PrivacyConfig::default();
         config.mask_emails = true; // Enable email masking for test
-        let filter = PrivacyFilter::new(config);
+        let mut filter = PrivacyFilter::new(config);
         let text = "Contact me at john.doe@example.com";
-        let filtered = filter.filter_text(text);
+        let filtered = filter.filter_text(text, "test_app", "test_window");
         assert!(filtered.contains("[EMAIL]"));
         assert!(!filtered.contains("john.doe@example.com"));
     }
     
     #[test]
     fn test_ssn_detection() {
-        let filter = PrivacyFilter::new(PrivacyConfig::default());
+        let mut filter = PrivacyFilter::new(PrivacyConfig::default());
         let text = "SSN: 123-45-6789";
-        let filtered = filter.filter_text(text);
+        let filtered = filter.filter_text(text, "test_app", "test_window");
         assert!(filtered.contains("[SSN]"));
         assert!(!filtered.contains("123-45-6789"));
     }
     
     #[test]
     fn test_credit_card_detection() {
-        let filter = PrivacyFilter::new(PrivacyConfig::default());
+        let mut filter = PrivacyFilter::new(PrivacyConfig::default());
         let text = "Card: 4532 1234 5678 9012";
-        let filtered = filter.filter_text(text);
+        let filtered = filter.filter_text(text, "test_app", "test_window");
         assert!(filtered.contains("[CREDIT_CARD]"));
         assert!(!filtered.contains("4532 1234 5678 9012"));
     }
