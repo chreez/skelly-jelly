@@ -418,7 +418,8 @@ export class AnimationEngine {
     if (this.frameCount % 60 === 0) {
       this.performanceMetrics.frameTime = frameTime;
       this.performanceMetrics.fps = 1000 / (frameTime || 1);
-      this.performanceMetrics.activeTracks = this.mixer.getRoot().children.length;
+      const root = this.mixer.getRoot();
+      this.performanceMetrics.activeTracks = (root as THREE.Object3D).children?.length || 0;
 
       // Memory estimation (rough)
       if (typeof performance !== 'undefined' && (performance as any).memory) {

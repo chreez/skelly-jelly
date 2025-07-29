@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { SkellyCompanion } from './components/SkellyCompanion/SkellyCompanion';
+import { MoodState } from './types/state.types';
 import './index.css';
 
 // Demo application showcasing the Skelly Companion
@@ -10,17 +11,15 @@ function App() {
       <SkellyCompanion
         id="demo-skelly"
         initialState={{
-          mood: 'happy',
+          mood: MoodState.HAPPY,
           energy: 75,
           meltLevel: 0.3
         }}
-        initialPosition={{ x: 200, y: 200 }}
-        enableDragAndDrop={true}
-        enableKeyboardNavigation={true}
+        position={{ x: 200, y: 200 }}
         onStateChange={(state) => {
           console.log('Skelly state changed:', state);
         }}
-        onUserInteraction={(interaction) => {
+        onInteraction={(interaction: any) => {
           console.log('User interaction:', interaction);
         }}
       />

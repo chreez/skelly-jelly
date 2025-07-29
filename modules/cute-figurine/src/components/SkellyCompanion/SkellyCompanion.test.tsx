@@ -214,15 +214,7 @@ describe('SkellyCompanion', () => {
 
       // Mock the subscribe function to simulate state changes
       const mockUnsubscribe = vi.fn();
-      mockCompanionStore.subscribe.mockImplementation((_selector: any, callback: any) => {
-        // Simulate a state change
-        setTimeout(() => {
-          const newState = { mood: MoodState.FOCUSED, energy: 85 };
-          const oldState = { mood: MoodState.HAPPY, energy: 80 };
-          callback(newState, oldState);
-        }, 100);
-        return mockUnsubscribe;
-      });
+      mockCompanionStore.subscribe.mockReturnValue(mockUnsubscribe);
 
       render(<SkellyCompanion onStateChange={onStateChange} />);
 

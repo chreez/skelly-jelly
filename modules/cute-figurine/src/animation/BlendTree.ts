@@ -335,8 +335,9 @@ export class BlendTree {
 
         if (!action) {
           // Try to get clip from mixer (assuming it was added elsewhere)
-          const clips = this.mixer!.getRoot().animations || [];
-          const clip = clips.find((c) => c.name === node.animation);
+          const root = this.mixer!.getRoot();
+          const clips = (root as THREE.Object3D).animations || [];
+          const clip = clips.find((c: THREE.AnimationClip) => c.name === node.animation);
 
           if (clip) {
             action = this.mixer!.clipAction(clip);
