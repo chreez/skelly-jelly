@@ -268,44 +268,44 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
   }, [loadPrivacyStats, loadAuditLog, activeTab]);
 
   const renderOverviewTab = () => (
-    <div className=\"privacy-overview\">
-      <div className=\"privacy-stats-grid\">
-        <div className=\"stat-card\">
+    <div className="privacy-overview">
+      <div className="privacy-stats-grid">
+        <div className="stat-card">
           <h3>Screenshots</h3>
-          <div className=\"stat-value\">{stats?.screenshotsStored || 0}</div>
-          <div className=\"stat-label\">Currently Stored</div>
-          <div className=\"stat-detail\">
+          <div className="stat-value">{stats?.screenshotsStored || 0}</div>
+          <div className="stat-label">Currently Stored</div>
+          <div className="stat-detail">
             {stats?.screenshotsAnalyzed || 0} analyzed, {stats?.screenshotsDeleted || 0} auto-deleted
           </div>
         </div>
 
-        <div className=\"stat-card\">
+        <div className="stat-card">
           <h3>Data Size</h3>
-          <div className=\"stat-value\">{stats?.totalDataSize || '0 MB'}</div>
-          <div className=\"stat-label\">Total Storage Used</div>
-          <div className=\"stat-detail\">
+          <div className="stat-value">{stats?.totalDataSize || '0 MB'}</div>
+          <div className="stat-label">Total Storage Used</div>
+          <div className="stat-detail">
             Oldest data: {stats?.oldestDataAge || 'N/A'}
           </div>
         </div>
 
-        <div className=\"stat-card\">
+        <div className="stat-card">
           <h3>PII Protection</h3>
-          <div className=\"stat-value\">{stats?.piiDetectionsToday || 0}</div>
-          <div className=\"stat-label\">Detections Today</div>
-          <div className=\"stat-detail\">
+          <div className="stat-value">{stats?.piiDetectionsToday || 0}</div>
+          <div className="stat-label">Detections Today</div>
+          <div className="stat-detail">
             {((stats?.piiAccuracy || 0) * 100).toFixed(1)}% accuracy
           </div>
         </div>
 
-        <div className=\"stat-card privacy-guarantee\">
+        <div className="stat-card privacy-guarantee">
           <h3>Privacy Status</h3>
-          <div className=\"stat-value\">
+          <div className="stat-value">
             {stats?.networkIsolationVerified && stats?.localInferenceVerified ? '✓ SECURE' : '⚠️ CHECKING'}
           </div>
-          <div className=\"stat-label\">
+          <div className="stat-label">
             {stats?.networkIsolationVerified ? '100% Local' : 'Verifying...'}
           </div>
-          <div className=\"stat-detail\">
+          <div className="stat-detail">
             Network Isolation: {stats?.networkIsolationVerified ? '✅' : '🔍'}<br/>
             Local Inference: {stats?.localInferenceVerified ? '✅' : '🔍'}<br/>
             Encryption: {stats?.encryptionEnabled ? '✅' : '❌'}
@@ -313,38 +313,38 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
         </div>
       </div>
 
-      <div className=\"privacy-controls\">
+      <div className="privacy-controls">
         <h3>Quick Actions</h3>
-        <div className=\"control-buttons\">
+        <div className="control-buttons">
           <button 
-            className=\"btn-secondary\"
+            className="btn-secondary"
             onClick={handleForceCleanup}
             disabled={loading}
           >
             🧹 Force Screenshot Cleanup
           </button>
           <button 
-            className=\"btn-secondary\"
+            className="btn-secondary"
             onClick={handleVerifyNetworkIsolation}
             disabled={loading}
           >
             🔍 Verify Network Isolation
           </button>
           <button 
-            className=\"btn-secondary\"
+            className="btn-secondary"
             onClick={handleTestPIIDetection}
             disabled={loading}
           >
             🧪 Test PII Detection
           </button>
           <button 
-            className=\"btn-primary\"
+            className="btn-primary"
             onClick={() => setActiveTab('export')}
           >
             📦 Export My Data
           </button>
           <button 
-            className=\"btn-danger\"
+            className="btn-danger"
             onClick={() => setActiveTab('delete')}
           >
             🗑️ Delete Data
@@ -352,7 +352,7 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
         </div>
       </div>
 
-      <div className=\"privacy-guarantees\">
+      <div className="privacy-guarantees">
         <h3>Privacy Guarantees</h3>
         <ul>
           <li>
@@ -360,7 +360,7 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
               new Date(stats.lastScreenshotCleanup).getTime() > Date.now() - 30000) ? '✅' : '⏱️'} 
             All screenshots deleted after 30 seconds
             {stats?.lastScreenshotCleanup && 
-              <span className=\"detail\"> (Last cleanup: {new Date(stats.lastScreenshotCleanup).toLocaleTimeString()})</span>
+              <span className="detail"> (Last cleanup: {new Date(stats.lastScreenshotCleanup).toLocaleTimeString()})</span>
             }
           </li>
           <li>
@@ -370,7 +370,7 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
           <li>
             {stats?.piiAccuracy && stats.piiAccuracy >= 0.95 ? '✅' : '🔍'} 
             PII automatically detected and masked 
-            <span className=\"detail\">({((stats?.piiAccuracy || 0) * 100).toFixed(1)}% accuracy)</span>
+            <span className="detail">({((stats?.piiAccuracy || 0) * 100).toFixed(1)}% accuracy)</span>
           </li>
           <li>
             {stats?.networkIsolationVerified ? '✅' : '🔍'} 
@@ -387,12 +387,12 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
   );
 
   const renderExportTab = () => (
-    <div className=\"privacy-export\">
+    <div className="privacy-export">
       <h3>Export Your Data</h3>
       <p>Download a complete copy of your data for portability or backup.</p>
 
-      <div className=\"export-options\">
-        <div className=\"option-group\">
+      <div className="export-options">
+        <div className="option-group">
           <label>Export Format:</label>
           <select 
             value={exportOptions.format}
@@ -401,13 +401,13 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
               format: e.target.value as 'json' | 'csv' | 'xml'
             })}
           >
-            <option value=\"json\">JSON (Recommended)</option>
-            <option value=\"csv\">CSV (Spreadsheet)</option>
-            <option value=\"xml\">XML</option>
+            <option value="json">JSON (Recommended)</option>
+            <option value="csv">CSV (Spreadsheet)</option>
+            <option value="xml">XML</option>
           </select>
         </div>
 
-        <div className=\"option-group\">
+        <div className="option-group">
           <label>Date Range:</label>
           <select 
             value={exportOptions.dateRange}
@@ -416,19 +416,19 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
               dateRange: e.target.value as 'today' | 'week' | 'month' | 'all'
             })}
           >
-            <option value=\"today\">Today</option>
-            <option value=\"week\">Last Week</option>
-            <option value=\"month\">Last Month</option>
-            <option value=\"all\">All Data</option>
+            <option value="today">Today</option>
+            <option value="week">Last Week</option>
+            <option value="month">Last Month</option>
+            <option value="all">All Data</option>
           </select>
         </div>
 
-        <div className=\"option-group\">
+        <div className="option-group">
           <label>Include Data Types:</label>
-          <div className=\"checkbox-group\">
+          <div className="checkbox-group">
             <label>
               <input 
-                type=\"checkbox\"
+                type="checkbox"
                 checked={exportOptions.includeScreenshots}
                 onChange={(e) => setExportOptions({
                   ...exportOptions,
@@ -439,7 +439,7 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
             </label>
             <label>
               <input 
-                type=\"checkbox\"
+                type="checkbox"
                 checked={exportOptions.includeBehavioralData}
                 onChange={(e) => setExportOptions({
                   ...exportOptions,
@@ -450,7 +450,7 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
             </label>
             <label>
               <input 
-                type=\"checkbox\"
+                type="checkbox"
                 checked={exportOptions.includeAuditLog}
                 onChange={(e) => setExportOptions({
                   ...exportOptions,
@@ -462,10 +462,10 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
           </div>
         </div>
 
-        <div className=\"option-group\">
+        <div className="option-group">
           <label>
             <input 
-              type=\"checkbox\"
+              type="checkbox"
               checked={exportOptions.anonymize}
               onChange={(e) => setExportOptions({
                 ...exportOptions,
@@ -478,7 +478,7 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
       </div>
 
       <button 
-        className=\"btn-primary export-btn\"
+        className="btn-primary export-btn"
         onClick={handleExportData}
         disabled={loading}
       >
@@ -488,12 +488,12 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
   );
 
   const renderDeleteTab = () => (
-    <div className=\"privacy-delete\">
+    <div className="privacy-delete">
       <h3>Delete Your Data</h3>
-      <p className=\"warning\">⚠️ Data deletion is permanent and cannot be undone.</p>
+      <p className="warning">⚠️ Data deletion is permanent and cannot be undone.</p>
 
-      <div className=\"delete-options\">
-        <div className=\"option-group\">
+      <div className="delete-options">
+        <div className="option-group">
           <label>Data Type to Delete:</label>
           <select 
             value={deletionOptions.dataType}
@@ -502,14 +502,14 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
               dataType: e.target.value as 'all' | 'screenshots' | 'behavioral' | 'audit_logs'
             })}
           >
-            <option value=\"screenshots\">Screenshots Only</option>
-            <option value=\"behavioral\">Behavioral Data Only</option>
-            <option value=\"audit_logs\">Audit Logs Only</option>
-            <option value=\"all\">All Data (Complete Reset)</option>
+            <option value="screenshots">Screenshots Only</option>
+            <option value="behavioral">Behavioral Data Only</option>
+            <option value="audit_logs">Audit Logs Only</option>
+            <option value="all">All Data (Complete Reset)</option>
           </select>
         </div>
 
-        <div className=\"option-group\">
+        <div className="option-group">
           <label>Date Range:</label>
           <select 
             value={deletionOptions.dateRange}
@@ -518,17 +518,17 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
               dateRange: e.target.value as 'today' | 'week' | 'month' | 'all'
             })}
           >
-            <option value=\"today\">Today Only</option>
-            <option value=\"week\">Last Week</option>
-            <option value=\"month\">Last Month</option>
-            <option value=\"all\">All Time</option>
+            <option value="today">Today Only</option>
+            <option value="week">Last Week</option>
+            <option value="month">Last Month</option>
+            <option value="all">All Time</option>
           </select>
         </div>
 
-        <div className=\"option-group\">
+        <div className="option-group">
           <label>
             <input 
-              type=\"checkbox\"
+              type="checkbox"
               checked={deletionOptions.secureOverwrite}
               onChange={(e) => setDeletionOptions({
                 ...deletionOptions,
@@ -541,7 +541,7 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
       </div>
 
       <button 
-        className=\"btn-danger delete-btn\"
+        className="btn-danger delete-btn"
         onClick={handleDeleteData}
         disabled={loading}
       >
@@ -551,26 +551,26 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
   );
 
   const renderAuditTab = () => (
-    <div className=\"privacy-audit\">
+    <div className="privacy-audit">
       <h3>Privacy Audit Log</h3>
       <p>Complete transparency into all privacy operations.</p>
 
-      <div className=\"audit-log\">
+      <div className="audit-log">
         {auditLog.length === 0 ? (
-          <div className=\"no-data\">No audit entries found.</div>
+          <div className="no-data">No audit entries found.</div>
         ) : (
-          <div className=\"audit-entries\">
+          <div className="audit-entries">
             {auditLog.map((entry, index) => (
               <div key={index} className={`audit-entry ${entry.success ? 'success' : 'failure'}`}>
-                <div className=\"audit-header\">
-                  <span className=\"audit-timestamp\">{entry.timestamp}</span>
+                <div className="audit-header">
+                  <span className="audit-timestamp">{entry.timestamp}</span>
                   <span className={`audit-status ${entry.success ? 'success' : 'failure'}`}>
                     {entry.success ? '✅' : '❌'}
                   </span>
                 </div>
-                <div className=\"audit-action\">{entry.action}</div>
-                <div className=\"audit-details\">{entry.details}</div>
-                <div className=\"audit-data\">Data: {entry.dataAffected}</div>
+                <div className="audit-action">{entry.action}</div>
+                <div className="audit-details">{entry.details}</div>
+                <div className="audit-data">Data: {entry.dataAffected}</div>
               </div>
             ))}
           </div>
@@ -580,13 +580,13 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
   );
 
   return (
-    <div className=\"privacy-dashboard\">
-      <div className=\"dashboard-header\">
+    <div className="privacy-dashboard">
+      <div className="dashboard-header">
         <h2>🔒 Privacy Dashboard</h2>
         <p>Complete control over your personal data</p>
       </div>
 
-      <div className=\"dashboard-tabs\">
+      <div className="dashboard-tabs">
         <button 
           className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
           onClick={() => setActiveTab('overview')}
@@ -613,8 +613,8 @@ ${result.accuracy >= 95.0 && result.falsePositiveRate <= 1.0 ? '✅ Requirements
         </button>
       </div>
 
-      <div className=\"dashboard-content\">
-        {loading && <div className=\"loading-overlay\">Processing...</div>}
+      <div className="dashboard-content">
+        {loading && <div className="loading-overlay">Processing...</div>}
         
         {activeTab === 'overview' && renderOverviewTab()}
         {activeTab === 'export' && renderExportTab()}
