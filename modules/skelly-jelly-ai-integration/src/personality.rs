@@ -4,7 +4,7 @@
 //! with chill, supportive vibes and occasional skeleton puns.
 
 use crate::error::{AIIntegrationError, Result};
-use crate::types::{PersonalityTraits, ADHDState, BehavioralMetrics, CompanionMood};
+use crate::types::{PersonalityTraits, ADHDState, BehavioralMetrics, CompanionMood, WorkContext};
 use rand::seq::SliceRandom;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
@@ -165,6 +165,7 @@ pub struct PersonalityContext {
     pub metrics: BehavioralMetrics,
     pub time_of_day: String,
     pub recent_interactions: Vec<InteractionHistory>,
+    pub work_context: WorkContext,
 }
 
 #[derive(Debug, Clone)]
@@ -507,6 +508,7 @@ mod tests {
             },
             time_of_day: "afternoon".to_string(),
             recent_interactions: Vec::new(),
+            work_context: WorkContext::default(),
         };
 
         let message = "Try taking a short break";
@@ -539,6 +541,7 @@ mod tests {
             },
             time_of_day: "morning".to_string(),
             recent_interactions: Vec::new(),
+            work_context: WorkContext::default(),
         };
 
         let mood = tracker.determine_mood(&flow_context);
@@ -592,6 +595,7 @@ mod tests {
             },
             time_of_day: "afternoon".to_string(),
             recent_interactions: Vec::new(),
+            work_context: WorkContext::default(),
         };
 
         let message = "focus on your task";

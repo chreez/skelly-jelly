@@ -121,6 +121,20 @@ pub struct WorkContext {
     pub time_of_day: TimeOfDay,
 }
 
+impl Default for WorkContext {
+    fn default() -> Self {
+        Self {
+            work_type: WorkType::Unknown,
+            application: "unknown".to_string(),
+            window_title: "unknown".to_string(),
+            screenshot_text: None,
+            task_category: TaskCategory::Unknown,
+            urgency: UrgencyLevel::Medium,
+            time_of_day: TimeOfDay::Afternoon,
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum WorkType {
     Coding { language: String, framework: Option<String> },
