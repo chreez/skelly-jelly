@@ -11,6 +11,7 @@ use std::{
     time::{Duration, Instant},
     collections::VecDeque,
 };
+use chrono::{DateTime, Utc};
 use sysinfo::{System, Cpu, Process, Pid, ProcessExt, SystemExt};
 use tokio::{
     task::JoinHandle,
@@ -102,13 +103,14 @@ impl ResourceLimits {
 }
 
 /// Current resource usage for a module
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ResourceUsage {
     pub cpu_percent: f32,
     pub memory_mb: usize,
     pub file_handles: usize,
     pub threads: usize,
-    pub timestamp: Instant,
+    pub battery_impact: f32,
+    pub timestamp: DateTime<Utc>,
 }
 
 impl ResourceUsage {
@@ -165,7 +167,7 @@ pub struct ResourceAllocations {
     pub memory_usage: HashMap<ModuleId, usize>,
     pub thread_count: HashMap<ModuleId, usize>,
     pub file_handle_count: HashMap<ModuleId, usize>,
-    pub last_updated: Instant,
+    pub last_updated: DateTime<Utc>,
 }
 
 impl ResourceAllocations {
@@ -175,7 +177,7 @@ impl ResourceAllocations {
             memory_usage: HashMap::new(),
             thread_count: HashMap::new(),
             file_handle_count: HashMap::new(),
-            last_updated: Instant::now(),
+            last_updated: Utc::now(),
         }
     }
 
@@ -197,7 +199,7 @@ impl ResourceAllocations {
 }
 
 /// System-wide resource information
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SystemResources {
     pub total_cpu_usage: f32,
     pub total_memory_mb: usize,
@@ -205,7 +207,7 @@ pub struct SystemResources {
     pub disk_usage_mb: usize,
     pub network_bandwidth_kbps: f32,
     pub load_average: (f32, f32, f32), // 1min, 5min, 15min
-    pub timestamp: Instant,
+    pub timestamp: DateTime<Utc>,
 }
 
 impl SystemResources {
@@ -215,6 +217,15 @@ impl SystemResources {
         } else {
             0.0
         }
+    }
+    
+    pub fn system_health_score(&self) -> f32 {
+        // Calculate system health score based on resource usage
+        let memory_score = 1.0 - (self.memory_usage_percent() / 100.0).min(1.0);
+        let cpu_score = 1.0 - (self.total_cpu_usage / 100.0).min(1.0);
+        let load_score = 1.0 - (self.load_average.0 / 4.0).min(1.0); // Assume 4.0 as high load
+        
+        (memory_score + cpu_score + load_score) / 3.0
     }
 }
 
@@ -485,7 +496,7 @@ impl ResourceManager {
             disk_usage_mb: 0, // Simplified - would need disk monitoring
             network_bandwidth_kbps: 0.0, // Simplified - would need network monitoring
             load_average: (0.0, 0.0, 0.0), // Simplified - system.load_average() may not be available on all platforms
-            timestamp: Instant::now(),
+            timestamp: Utc::now(),
         })
     }
 
@@ -566,12 +577,13 @@ impl ResourceManager {
                 memory_mb: memory_usage,
                 file_handles: file_handles,
                 threads,
-                timestamp: Instant::now(),
+                battery_impact: cpu_usage / 100.0 * 0.3 + (memory_usage as f32 / 1024.0) * 0.1, // Simple battery impact calculation
+                timestamp: Utc::now(),
             };
             current_usage.insert(module_id, usage);
         }
 
-        alloc.last_updated = Instant::now();
+        alloc.last_updated = Utc::now();
         debug!("Updated resource allocations for {} modules", modules.len());
         
         Ok(())

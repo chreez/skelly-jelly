@@ -1,7 +1,7 @@
 //! Performance telemetry system for real-time monitoring and regression detection
 
 use crate::error::{OrchestratorError, OrchestratorResult};
-use crate::resource::{ResourceUsage, SystemResources, PerformanceStats, OptimizationRecommendation};
+use crate::resource::{ResourceUsage, SystemResources};
 use dashmap::DashMap;
 use skelly_jelly_event_bus::ModuleId;
 use serde::{Deserialize, Serialize};
@@ -10,12 +10,43 @@ use std::{
     sync::Arc,
     time::{Duration, Instant},
 };
+use chrono::{DateTime, Utc};
 use tokio::{
     sync::{RwLock, mpsc, watch},
     task::JoinHandle,
     time::interval,
 };
 use tracing::{debug, warn, error, info};
+
+/// Performance statistics structure
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PerformanceStats {
+    pub total_cpu_usage: f32,
+    pub total_memory_usage: usize,
+    pub system_health_score: f32,
+    pub event_processing_rate: f32,
+    pub average_latency: f32,
+    pub timestamp: DateTime<Utc>,
+}
+
+impl PerformanceStats {
+    pub fn new(
+        cpu_usage: f32,
+        memory_usage: usize,
+        health_score: f32,
+        processing_rate: f32,
+        latency: f32,
+    ) -> Self {
+        Self {
+            total_cpu_usage: cpu_usage,
+            total_memory_usage: memory_usage,
+            system_health_score: health_score,
+            event_processing_rate: processing_rate,
+            average_latency: latency,
+            timestamp: Utc::now(),
+        }
+    }
+}
 
 /// Performance metrics aggregation period
 const METRICS_AGGREGATION_PERIOD: Duration = Duration::from_secs(60);
@@ -105,19 +136,19 @@ pub struct MetricsStore {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TimestampedResourceUsage {
     pub usage: ResourceUsage,
-    pub timestamp: Instant,
+    pub timestamp: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TimestampedSystemResources {
     pub resources: SystemResources,
-    pub timestamp: Instant,
+    pub timestamp: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TimestampedPerformanceStats {
     pub stats: PerformanceStats,
-    pub timestamp: Instant,
+    pub timestamp: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -126,7 +157,7 @@ pub struct AlertEvent {
     pub severity: AlertSeverity,
     pub message: String,
     pub module_id: Option<ModuleId>,
-    pub timestamp: Instant,
+    pub timestamp: DateTime<Utc>,
     pub resolved: bool,
 }
 
@@ -252,7 +283,7 @@ impl PerformanceTelemetrySystem {
 
         let timestamped_usage = TimestampedResourceUsage {
             usage: usage.clone(),
-            timestamp: Instant::now(),
+            timestamp: Utc::now(),
         };
 
         {
@@ -280,7 +311,7 @@ impl PerformanceTelemetrySystem {
 
         let timestamped_resources = TimestampedSystemResources {
             resources: resources.clone(),
-            timestamp: Instant::now(),
+            timestamp: Utc::now(),
         };
 
         {
@@ -307,7 +338,7 @@ impl PerformanceTelemetrySystem {
 
         let timestamped_stats = TimestampedPerformanceStats {
             stats: stats.clone(),
-            timestamp: Instant::now(),
+            timestamp: Utc::now(),
         };
 
         {
@@ -364,24 +395,24 @@ impl PerformanceTelemetrySystem {
     /// Get performance trends
     pub async fn get_performance_trends(&self, duration: Duration) -> OrchestratorResult<PerformanceTrends> {
         let store = self.metrics_store.read().await;
-        let cutoff_time = Instant::now() - duration;
+        let cutoff_time = Utc::now() - chrono::Duration::from_std(duration).unwrap_or_default();
 
         // Collect CPU usage trend
-        let cpu_trend: Vec<(Instant, f32)> = store.performance_stats
+        let cpu_trend: Vec<(DateTime<Utc>, f32)> = store.performance_stats
             .iter()
             .filter(|ts_stats| ts_stats.timestamp >= cutoff_time)
             .map(|ts_stats| (ts_stats.timestamp, ts_stats.stats.total_cpu_usage))
             .collect();
 
         // Collect memory usage trend
-        let memory_trend: Vec<(Instant, usize)> = store.performance_stats
+        let memory_trend: Vec<(DateTime<Utc>, usize)> = store.performance_stats
             .iter()
             .filter(|ts_stats| ts_stats.timestamp >= cutoff_time)
             .map(|ts_stats| (ts_stats.timestamp, ts_stats.stats.total_memory_usage))
             .collect();
 
         // Calculate efficiency trends
-        let efficiency_trend: Vec<(Instant, f32)> = store.performance_stats
+        let efficiency_trend: Vec<(DateTime<Utc>, f32)> = store.performance_stats
             .iter()
             .filter(|ts_stats| ts_stats.timestamp >= cutoff_time)
             .map(|ts_stats| (ts_stats.timestamp, ts_stats.stats.system_health_score))
@@ -426,7 +457,7 @@ impl PerformanceTelemetrySystem {
     ) -> OrchestratorResult<()> {
         debug!("Cleaning up old metrics");
 
-        let cutoff_time = Instant::now() - retention_period;
+        let cutoff_time = Utc::now() - chrono::Duration::from_std(retention_period).unwrap_or_default();
         let mut store = metrics_store.write().await;
 
         // Clean up module metrics
@@ -461,9 +492,9 @@ pub struct DashboardData {
 /// Performance trends over time
 #[derive(Debug, Clone)]
 pub struct PerformanceTrends {
-    pub cpu_usage_trend: Vec<(Instant, f32)>,
-    pub memory_usage_trend: Vec<(Instant, usize)>,
-    pub efficiency_trend: Vec<(Instant, f32)>,
+    pub cpu_usage_trend: Vec<(DateTime<Utc>, f32)>,
+    pub memory_usage_trend: Vec<(DateTime<Utc>, usize)>,
+    pub efficiency_trend: Vec<(DateTime<Utc>, f32)>,
     pub duration: Duration,
     pub samples: usize,
 }
@@ -490,7 +521,7 @@ pub struct PerformanceBaseline {
     pub cpu_usage_baseline: f32,
     pub memory_usage_baseline: usize,
     pub efficiency_baseline: f32,
-    pub established_at: Instant,
+    pub established_at: DateTime<Utc>,
 }
 
 impl RegressionDetector {
@@ -529,7 +560,7 @@ impl RegressionDetector {
                 cpu_usage_baseline: current_stats.total_cpu_usage,
                 memory_usage_baseline: current_stats.total_memory_usage,
                 efficiency_baseline: current_stats.system_health_score,
-                established_at: Instant::now(),
+                established_at: Utc::now(),
             });
             info!("Performance baseline established");
         }
@@ -559,7 +590,7 @@ impl AlertSystem {
                 message: format!("Module {:?} CPU usage ({:.2}%) exceeds threshold ({:.2}%)", 
                     module_id, usage.cpu_percent, self.thresholds.cpu_usage_threshold),
                 module_id: Some(module_id),
-                timestamp: Instant::now(),
+                timestamp: Utc::now(),
                 resolved: false,
             }).await;
         }
@@ -572,7 +603,7 @@ impl AlertSystem {
                 message: format!("Module {:?} memory usage ({}MB) exceeds threshold ({}MB)", 
                     module_id, usage.memory_mb, self.thresholds.memory_usage_threshold),
                 module_id: Some(module_id),
-                timestamp: Instant::now(),
+                timestamp: Utc::now(),
                 resolved: false,
             }).await;
         }
@@ -585,7 +616,7 @@ impl AlertSystem {
                 message: format!("Module {:?} battery drain ({:.1}%) exceeds threshold ({:.1}%)", 
                     module_id, usage.battery_impact * 100.0, self.thresholds.battery_drain_threshold * 100.0),
                 module_id: Some(module_id),
-                timestamp: Instant::now(),
+                timestamp: Utc::now(),
                 resolved: false,
             }).await;
         }
@@ -600,7 +631,7 @@ impl AlertSystem {
                 severity: AlertSeverity::Error,
                 message: format!("System health score ({:.2}) is critically low", health_score),
                 module_id: None,
-                timestamp: Instant::now(),
+                timestamp: Utc::now(),
                 resolved: false,
             }).await;
         }

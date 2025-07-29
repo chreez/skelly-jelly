@@ -3,12 +3,14 @@
 use crate::error::{OrchestratorError, OrchestratorResult};
 use dashmap::DashMap;
 use skelly_jelly_event_bus::{ModuleId, MessageId, BusMessage};
+use anyhow;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{HashMap, VecDeque},
     sync::{Arc, atomic::{AtomicU64, AtomicBool, Ordering}},
     time::{Duration, Instant},
 };
+use chrono::{DateTime, Utc};
 use tokio::{
     sync::{RwLock, mpsc, watch, Semaphore},
     task::JoinHandle,
@@ -25,7 +27,7 @@ const BACKPRESSURE_RELIEF_TIME: Duration = Duration::from_millis(100);
 /// Event loss prevention system
 pub struct EventLossPreventionSystem {
     /// Queue monitors per module
-    queue_monitors: DashMap<ModuleId, QueueMonitor>,
+    queue_monitors: Arc<DashMap<ModuleId, QueueMonitor>>,
     
     /// Backpressure controllers
     backpressure_controllers: DashMap<ModuleId, BackpressureController>,
@@ -259,11 +261,21 @@ pub struct EventLossTracker {
     last_calculation: RwLock<Instant>,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct ModuleEventStats {
     pub total_events: AtomicU64,
     pub dropped_events: AtomicU64,
-    pub last_updated: RwLock<Instant>,
+    pub last_updated: RwLock<DateTime<Utc>>,
+}
+
+impl Default for ModuleEventStats {
+    fn default() -> Self {
+        Self {
+            total_events: AtomicU64::new(0),
+            dropped_events: AtomicU64::new(0),
+            last_updated: RwLock::new(Utc::now()),
+        }
+    }
 }
 
 impl EventLossTracker {
@@ -282,7 +294,7 @@ impl EventLossTracker {
         
         let stats = self.module_stats.entry(module_id).or_insert_with(ModuleEventStats::default);
         stats.total_events.fetch_add(1, Ordering::SeqCst);
-        *stats.last_updated.blocking_write() = Instant::now();
+        *stats.last_updated.blocking_write() = Utc::now();
     }
 
     pub fn record_drop(&self, module_id: ModuleId) {
@@ -290,7 +302,7 @@ impl EventLossTracker {
         
         let stats = self.module_stats.entry(module_id).or_insert_with(ModuleEventStats::default);
         stats.dropped_events.fetch_add(1, Ordering::SeqCst);
-        *stats.last_updated.blocking_write() = Instant::now();
+        *stats.last_updated.blocking_write() = Utc::now();
     }
 
     pub async fn calculate_loss_rate(&self) -> f32 {
@@ -403,14 +415,14 @@ impl EmergencyCircuitBreaker {
                         *self.state.write().await = CircuitBreakerState::HalfOpen;
                         self.failure_count.store(0, Ordering::SeqCst);
                     } else {
-                        return Err(OrchestratorError::Internal("Circuit breaker is open".to_string()));
+                        return Err(OrchestratorError::Internal(anyhow::anyhow!("Circuit breaker is open")));
                     }
                 }
             }
             CircuitBreakerState::HalfOpen => {
                 // Limited calls in half-open state
                 if self.failure_count.load(Ordering::SeqCst) >= self.config.half_open_max_calls {
-                    return Err(OrchestratorError::Internal("Circuit breaker half-open limit exceeded".to_string()));
+                    return Err(OrchestratorError::Internal(anyhow::anyhow!("Circuit breaker half-open limit exceeded")));
                 }
             }
             CircuitBreakerState::Closed => {
@@ -547,7 +559,7 @@ impl EventLossPreventionSystem {
     /// Create a new event loss prevention system
     pub fn new(config: EventLossPreventionConfig) -> Self {
         Self {
-            queue_monitors: DashMap::new(),
+            queue_monitors: Arc::new(DashMap::new()),
             backpressure_controllers: DashMap::new(),
             loss_tracker: Arc::new(EventLossTracker::new()),
             emergency_circuit_breaker: Arc::new(EmergencyCircuitBreaker::new(CircuitBreakerConfig::default())),
@@ -567,7 +579,7 @@ impl EventLossPreventionSystem {
         info!("Starting event loss prevention system");
 
         // Start monitoring task
-        let queue_monitors = self.queue_monitors.clone();
+        let queue_monitors = Arc::clone(&self.queue_monitors);
         let loss_tracker = Arc::clone(&self.loss_tracker);
         let degradation_manager = Arc::clone(&self.degradation_manager);
         let monitoring_interval = self.config.monitoring_interval;
@@ -699,7 +711,7 @@ impl EventLossPreventionSystem {
             module_statistics: module_stats,
             degradation_level,
             circuit_breaker_state,
-            last_updated: Instant::now(),
+            last_updated: Utc::now(),
         }
     }
 }
@@ -714,7 +726,7 @@ pub struct EventLossStatistics {
     pub module_statistics: HashMap<ModuleId, ModuleStatistics>,
     pub degradation_level: DegradationLevel,
     pub circuit_breaker_state: CircuitBreakerState,
-    pub last_updated: Instant,
+    pub last_updated: DateTime<Utc>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -21,6 +21,7 @@ use std::{
     sync::Arc,
     time::{Duration, Instant},
 };
+use chrono::{DateTime, Utc};
 use tokio::sync::RwLock;
 use tracing::{info, warn, error, debug};
 use uuid::Uuid;
@@ -500,7 +501,7 @@ impl OrchestratorTrait for OrchestratorImpl {
                 disk_usage_mb: 0,
                 network_bandwidth_kbps: 0.0,
                 load_average: (0.0, 0.0, 0.0),
-                timestamp: Instant::now(),
+                timestamp: Utc::now(),
             });
 
         let active_issues = {
