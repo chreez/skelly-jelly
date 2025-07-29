@@ -1,0 +1,60 @@
+[package]
+name = "skelly-jelly-analysis-engine"
+version = "0.1.0"
+edition = "2021"
+description = "ADHD state detection and behavioral analysis engine for Skelly-Jelly"
+license = "MIT"
+
+[dependencies]
+# Core dependencies
+tokio = { version = "1.40", features = ["full"] }
+async-trait = "0.1"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+anyhow = "1.0"
+thiserror = "2.0"
+
+# ML and numerical computation
+smartcore = { version = "0.3", features = ["serde"] }
+ndarray = { version = "0.15", features = ["serde"] }
+ndarray-stats = "0.5"
+statrs = "0.16"
+ort = { version = "2.0.0-rc.10", features = ["load-dynamic"] }  # ONNX Runtime
+
+# Performance and parallelism
+rayon = "1.8"
+dashmap = "6.0"
+
+# Logging and tracing
+tracing = "0.1"
+log = "0.4"
+
+# Random number generation
+rand = "0.8"
+
+[[example]]
+name = "performance_validation_demo"
+path = "examples/performance_validation_demo.rs"
+
+# Image processing
+image = { version = "0.24", features = ["png", "webp"] }
+imageproc = "0.23"
+
+# Removed circular-buffer - using Vec instead for simplicity
+
+# Internal dependencies
+skelly-jelly-event-bus = { path = "../event-bus" }
+skelly-jelly-storage = { path = "../storage" }
+
+[dev-dependencies]
+tokio-test = "0.4"
+tempfile = "3.8"
+approx = "0.5"
+futures = "0.3"
+
+[features]
+default = []
+gpu = []
+benchmark = []

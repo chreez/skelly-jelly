@@ -1,0 +1,54 @@
+[package]
+name = "skelly-jelly-orchestrator"
+version = "0.1.0"
+edition = "2021"
+description = "System lifecycle manager and health monitor for Skelly-Jelly"
+
+[dependencies]
+# Async runtime and utilities
+tokio = { version = "1.40", features = ["full"] }
+async-trait = "0.1"
+futures = "0.3"
+
+# Event bus integration
+skelly-jelly-event-bus = { path = "../event-bus" }
+
+# System monitoring
+sysinfo = "0.30"
+
+# Data structures and concurrency
+dashmap = "6.0"
+petgraph = "0.6"
+crossbeam-channel = "0.5"
+parking_lot = "0.12"
+
+# File system watching
+notify = "6.0"
+
+# Serialization and time
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+
+# Error handling and utilities
+anyhow = "1.0"
+thiserror = "2.0"
+uuid = { version = "1.0", features = ["v4", "serde"] }
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+# Version management
+semver = { version = "1.0", features = ["serde"] }
+
+# Random number generation
+rand = "0.8"
+
+# Configuration parsing
+toml = "0.8"
+
+[dev-dependencies]
+tokio-test = "0.4"
+tempfile = "3.0"
+tracing-test = "0.2"

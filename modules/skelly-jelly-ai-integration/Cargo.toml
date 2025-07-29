@@ -1,0 +1,86 @@
+[package]
+name = "skelly-jelly-ai-integration"
+version = "0.1.0"
+edition = "2021"
+authors = ["Skelly Jelly Team"]
+description = "Privacy-first AI integration module with local LLM support and secure API fallback"
+keywords = ["ai", "privacy", "local-llm", "security"]
+license = "MIT"
+
+[dependencies]
+# Event bus integration
+skelly-jelly-event-bus = { path = "../event-bus" }
+
+# Async runtime and utilities
+tokio = { version = "1.40", features = ["full"] }
+async-trait = "0.1"
+futures = "0.3"
+
+# Serialization and data handling
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "2.0"
+
+# HTTP client for API fallback
+reqwest = { version = "0.11", features = ["json", "rustls-tls"], default-features = false }
+
+# Privacy and security
+regex = "1.0"
+sha2 = "0.10"
+base64 = "0.21"
+
+# Local LLM support (when available)
+candle-core = { version = "0.4", optional = true }
+candle-nn = { version = "0.4", optional = true }
+candle-transformers = { version = "0.4", optional = true }
+
+# Token counting and text processing
+tiktoken-rs = { version = "0.5", optional = true }
+unicode-segmentation = "1.10"
+
+# Caching and performance
+lru = "0.12"
+dashmap = "6.0"
+
+# Random number generation
+rand = "0.8"
+
+# Logging
+log = "0.4"
+tracing = "0.1"
+
+# System information
+sysinfo = "0.30"
+
+# Time handling
+chrono = { version = "0.4", features = ["serde"] }
+
+# UUID support
+uuid = { version = "1.0", features = ["v4", "serde"] }
+
+[features]
+default = ["api-fallback"]
+
+# Local inference capabilities (optional due to version conflicts)
+local-inference = ["candle-core", "candle-nn", "candle-transformers", "tiktoken-rs"]
+
+# API fallback support
+api-fallback = []
+
+# Enhanced privacy features
+enhanced-privacy = []
+
+# Development features
+dev = ["api-fallback", "enhanced-privacy"]
+
+[dev-dependencies]
+tempfile = "3.8"
+wiremock = "0.5"
+test-case = "3.3"
+
+[[example]]
+name = "local_inference_example"
+required-features = ["local-inference"]
