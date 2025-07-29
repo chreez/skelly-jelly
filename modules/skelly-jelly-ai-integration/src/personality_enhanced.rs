@@ -10,7 +10,7 @@ use std::collections::HashMap;
 use chrono::{DateTime, Utc, Duration};
 
 /// User expertise level in different domains
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum ExpertiseLevel {
     Beginner,
     Intermediate, 
@@ -29,14 +29,14 @@ pub struct CommunicationPreferences {
     pub last_updated: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum IntensityPreference {
     Subtle,
     Moderate,
     Energetic,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub enum FormalityLevel {
     Casual,
     Balanced,

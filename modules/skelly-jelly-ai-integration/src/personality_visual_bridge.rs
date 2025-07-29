@@ -581,8 +581,9 @@ impl AnimationCoordinator {
         communication_prefs: &CommunicationPreferences,
     ) -> Result<AnimationSequence> {
         let profile = self.determine_animation_profile(mood, communication_prefs);
+        let default_timing = TimingConfig::default();
         let timing_config = self.timing_profiles.get(&profile)
-            .unwrap_or(&TimingConfig::default());
+            .unwrap_or(&default_timing);
         
         let message_duration = self.calculate_message_duration(message);
         

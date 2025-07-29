@@ -628,14 +628,14 @@ impl PersonalityConsistencyValidator {
         if let Some(feedback) = user_feedback {
             // Update satisfaction rate (>75% requirement)
             let is_satisfied = feedback.satisfaction_score >= 4; // 4-5 on 1-5 scale
-            self.update_running_average(
+            Self::update_running_average(
                 &mut self.metrics_tracker.user_satisfaction_rate,
                 if is_satisfied { 1.0 } else { 0.0 },
             );
             
             // Update positive interaction rate (>60% requirement)
             let is_positive = feedback.satisfaction_score >= 3 && !feedback.felt_patronizing;
-            self.update_running_average(
+            Self::update_running_average(
                 &mut self.metrics_tracker.positive_interaction_rate,
                 if is_positive { 1.0 } else { 0.0 },
             );
@@ -645,14 +645,14 @@ impl PersonalityConsistencyValidator {
         if let Some(recent_record) = self.interaction_history.back() {
             // Tone consistency rate (>90% requirement)
             let tone_consistent = recent_record.calculated_metrics.tone_warmth >= 0.8;
-            self.update_running_average(
+            Self::update_running_average(
                 &mut self.metrics_tracker.tone_consistency_rate,
                 if tone_consistent { 1.0 } else { 0.0 },
             );
             
             // Appropriate complexity rate (>80% requirement)
             let complexity_appropriate = recent_record.calculated_metrics.expertise_appropriateness >= 0.8;
-            self.update_running_average(
+            Self::update_running_average(
                 &mut self.metrics_tracker.appropriate_complexity_rate,
                 if complexity_appropriate { 1.0 } else { 0.0 },
             );
@@ -662,7 +662,7 @@ impl PersonalityConsistencyValidator {
         Ok(())
     }
     
-    fn update_running_average(&self, current_avg: &mut f32, new_value: f32) {
+    fn update_running_average(current_avg: &mut f32, new_value: f32) {
         let alpha = 0.1; // Learning rate for exponential moving average
         *current_avg = (1.0 - alpha) * *current_avg + alpha * new_value;
     }
