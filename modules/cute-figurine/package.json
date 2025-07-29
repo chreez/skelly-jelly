@@ -13,6 +13,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "start": "node dist/app.js",
+    "start:ipc": "node dist/ipc_server.js",
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
