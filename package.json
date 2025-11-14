@@ -8,7 +8,7 @@
     "modules/cute-figurine"
   ],
   "scripts": {
-    "build": "npm run build:rust && npm run build:ts",
+    "build": "npm run build:ts && npm run build:rust",
     "build:rust": "cargo build --release",
     "build:ts": "npm run build --workspaces",
     "dev": "concurrently \"npm run dev:rust\" \"npm run dev:ts\"",
@@ -17,7 +17,13 @@
     "test": "npm run test:rust && npm run test:ts",
     "test:rust": "cargo test",
     "test:ts": "npm run test --workspaces",
-    "start": "npm run build && ./target/release/skelly-jelly",
+    "start": "npm run start:ts-only",
+    "start:full": "npm run build && concurrently --kill-others --success first \"npm run start:gamification\" \"npm run start:figurine\" \"npm run start:rust\"",
+    "start:ts-only": "npm run build:ts && concurrently --kill-others --success first \"npm run start:gamification\" \"npm run start:figurine\"",
+    "start:gamification": "cd modules/gamification && npm run start:ipc",
+    "start:figurine": "cd modules/cute-figurine && npm run start:ipc", 
+    "start:rust": "sleep 2 && ./target/release/skelly-jelly-full",
+    "start:demo": "./demo/run_demo.sh",
     "demo": "./demo/run_demo.sh",
     "clean": "cargo clean && npm run clean --workspaces"
   },

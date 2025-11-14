@@ -26,12 +26,25 @@ Skelly-Jelly is your melty skeleton companion who helps you stay focused without
 git clone <repository-url>
 cd skelly-jelly
 
-# Install uv (if needed)
-curl -LsSf https://astral.sh/uv/install.sh | sh
+# Single command to run the app
+./run.sh
 
-# Install dependencies and run
-uv sync
-uv run python main.py
+# Or use make (shows all options)
+make help
+make run
+```
+
+### Alternative Start Commands
+
+```bash
+# Full application with all services
+npm start
+
+# Demo mode (simulated components)
+npm run demo
+
+# Development mode (hot reload)
+npm run dev
 ```
 
 ## How It Works

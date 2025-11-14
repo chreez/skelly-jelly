@@ -12,7 +12,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc -p tsconfig.ipc.json && vite build",
     "start": "node dist/app.js",
     "start:ipc": "node dist/ipc_server.js",
     "preview": "vite preview",
